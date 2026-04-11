@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expense Tracker</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="description" content="Track your daily expenses with cloud sync">
+    <meta name="theme-color" content="#000000">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="Expenses">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="apple-touch-icon" href="/icon-192.png">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Calibri, 'Segoe UI', Tahoma, sans-serif;
+            background: #ffffff;
+            min-height: 100vh;
+            color: #000000;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            color: #000000;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid #000000;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 8px;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+
+        .header p {
+            font-size: 16px;
+            color: #666666;
+            font-weight: 400;
+        }
+
+        .sync-status {
+            text-align: center;
+            padding: 8px;
+            font-size: 13px;
+            color: #666;
+            background: #f5f5f5;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+
+        .sync-status.syncing {
+            background: #fffacd;
+            color: #000;
+        }
+
+        .sync-status.synced {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        /* Auth Screen */
+        .auth-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 80vh;
+        }
+
+        .auth-card {
+            background: #ffffff;
+            border: 2px solid #000000;
+            border-radius: 8px;
+            padding: 40px;
+            box-shadow: 8px 8px 0px #000000;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .auth-title {
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #000000;
+            font-size: 15px;
+            letter-spacing: 0.5px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #000000;
+            border-radius: 6px;
+            font-size: 16px;
+            font-family: Calibri, 'Segoe UI', Tahoma, sans-serif;
+            background: #ffffff;
+            color: #000000;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #000000;
+            box-shadow: 4px 4px 0px #000000;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 16px;
+            background: #000000;
+            color: #ffffff;
+            border: 2px solid #000000;
+            border-radius: 6px;
+            font-size: 17px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: Calibri, 'Segoe UI', Tahoma, sans-serif;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            background: #333333;
+        }
+
+        .btn:active {
+            transform: translate(2px, 2px);
+        }
+
+        .btn-secondary {
+            background: #ffffff;
+            color: #000000;
+            border: 2px solid #000000;
+        }
+
+        .btn-secondary:hover {
+            background: #f5f5f5;
+        }
+
+        .auth-switch {
+            text-align: center;
+            margin-top: 20px;
+            color: #666;
+        }
+
+        .auth-switch a {
+            color: #000;
+            text-decoration: underline;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            border: 1px solid #f5c6cb;
+            font-size: 14px;
+        }
+
+        /* Main App Styles */
+        .card {
+            background: #ffffff;
+            border: 2px solid #000000;
+            border-radius: 8px;
+            padding: 30px;
+            margin-bottom: 25px;
+            box-shadow: 8px 8px 0px #000000;
+        }
+
+        .summary {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .summary-item {
+            text-align: center;
+            padding: 25px;
+            background: #000000;
+            border-radius: 8px;
+            color: #ffffff;
+            border: 3px solid #000000;
+        }
+
+        .summary-item.green {
+            background: #ffffff;
+            color: #000000;
+            border: 3px solid #000000;
+        }
+
+        .summary-label {
+            font-size: 13px;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+        .summary-amount {
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #000000;
+            padding-bottom: 0;
+        }
+
+        .tab {
+            padding: 12px 24px;
+            background: #ffffff;
+            border: 2px solid #000000;
+            border-bottom: none;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 15px;
+            border-radius: 6px 6px 0 0;
+            font-family: Calibri, 'Segoe UI', Tahoma, sans-serif;
+            letter-spacing: 0.5px;
+        }
+
+        .tab:hover {
+            background: #f5f5f5;
+        }
+
+        .tab.active {
+            background: #000000;
+            color: #ffffff;
+        }
+
+        .view-content {
+            display: none;
+        }
+
+        .view-content.active {
+            display: block;
+        }
+
+        .expenses-list {
+            margin-top: 20px;
+        }
+
+        .expense-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 18px;
+            background: #ffffff;
+            border: 2px solid #000000;
+            border-radius: 6px;
+            margin-bottom: 12px;
+        }
+
+        .expense-info {
+            flex: 1;
+        }
+
+        .expense-description {
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: #000000;
+            font-size: 16px;
+        }
+
+        .expense-meta {
+            font-size: 13px;
+            color: #666666;
+        }
+
+        .expense-category {
+            display: inline-block;
+            padding: 4px 10px;
+            background: #000000;
+            color: #ffffff;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-right: 10px;
+            font-weight: 600;
+        }
+
+        .expense-subcategory {
+            background: #444444;
+        }
+
+        .expense-amount {
+            font-size: 20px;
+            font-weight: bold;
+            color: #000000;
+            margin-left: 15px;
+        }
+
+        .delete-btn {
+            background: #000000;
+            border: 2px solid #000000;
+            color: #ffffff;
+            font-size: 18px;
+            cursor: pointer;
+            padding: 8px 12px;
+            margin-left: 10px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+
+        .delete-btn:hover {
+            background: #ffffff;
+            color: #000000;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #666666;
+            border: 2px dashed #cccccc;
+            border-radius: 6px;
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+
+        .date-display {
+            text-align: center;
+            color: #000000;
+            font-size: 15px;
+            margin-bottom: 25px;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+
+        .user-info {
+            text-align: right;
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .logout-btn {
+            background: none;
+            border: none;
+            color: #000;
+            text-decoration: underline;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .subcategory-group {
+            display: none;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            font-size: 18px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div id="loadingScreen" class="loading">
+        <div>Loading...</div>
+    </div>
+
+    <!-- Auth Screen -->
+    <div id="authScreen" style="display: none;">
+        <div class="container">
+            <div class="auth-container">
+                <div class="auth-card">
+                    <div class="auth-title">💰 Expense Tracker</div>
+                    
+                    <div id="errorMessage" class="error-message" style="display: none;"></div>
+                    
+                    <div id="loginForm">
+                        <div class="form-group">
+                            <label for="loginEmail">Email</label>
+                            <input type="email" id="loginEmail" placeholder="your@email.com" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="loginPassword">Password</label>
+                            <input type="password" id="loginPassword" placeholder="••••••••" required>
+                        </div>
+                        <button class="btn" onclick="login()">Login</button>
+                        <div class="auth-switch">
+                            Don't have an account? <a onclick="showSignup()">Sign up</a>
+                        </div>
+                    </div>
+
+                    <div id="signupForm" style="display: none;">
+                        <div class="form-group">
+                            <label for="signupEmail">Email</label>
+                            <input type="email" id="signupEmail" placeholder="your@email.com" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="signupPassword">Password</label>
+                            <input type="password" id="signupPassword" placeholder="At least 6 characters" required>
+                        </div>
+                        <button class="btn" onclick="signup()">Sign Up</button>
+                        <div class="auth-switch">
+                            Already have an account? <a onclick="showLogin()">Login</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="appScreen" style="display: none;">
+        <div class="container">
+            <div class="user-info">
+                <span id="userEmail"></span> • 
+                <button class="logout-btn" onclick="logout()">Logout</button>
+            </div>
+
+            <div class="header">
+                <h1>💰 Expense Tracker</h1>
+                <p>Track your daily spending</p>
+            </div>
+
+            <div id="syncStatus" class="sync-status">Ready</div>
+            <div class="date-display" id="dateDisplay"></div>
+
+            <div class="tabs">
+                <div class="tab active" onclick="switchTab('add')">Add Expense</div>
+                <div class="tab" onclick="switchTab('list')">Expenses</div>
+            </div>
+
+            <div id="addView" class="view-content active">
+                <div class="card summary">
+                    <div class="summary-item green">
+                        <div class="summary-label">Today's Expenses</div>
+                        <div class="summary-amount">₹<span id="todayTotal">0</span></div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">This Month</div>
+                        <div class="summary-amount">₹<span id="monthTotal">0</span></div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2 style="margin-bottom: 20px; color: #000;">Add New Expense</h2>
+                    
+                    <div class="form-group">
+                        <label for="amount">Amount (₹)</label>
+                        <input type="number" id="amount" placeholder="Enter amount" min="0" step="0.01">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="expenseDate">Date</label>
+                        <input type="date" id="expenseDate" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="description">Description</label>
+                        <input type="text" id="description" placeholder="What did you spend on?">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="category">Category</label>
+                        <select id="category">
+                            <option value="">Select category</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group subcategory-group" id="subcategoryGroup">
+                        <label for="subcategory">Subcategory</label>
+                        <select id="subcategory">
+                            <option value="">Select subcategory</option>
+                        </select>
+                    </div>
+
+                    <button class="btn" onclick="addExpense()">Add Expense</button>
+                </div>
+            </div>
+
+            <div id="listView" class="view-content">
+                <div class="card">
+                    <h2 style="margin-bottom: 20px; color: #000;">Your Expenses</h2>
+                    <div id="expensesList" class="expenses-list"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { getDatabase, ref, push, set, onValue, remove, query, orderByChild } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyArYb8PbpZ0Hd6Q8PXCmcMbbxilBXmNgY0",
+            authDomain: "my-expense-tracker-f78e5.firebaseapp.com",
+            databaseURL: "https://my-expense-tracker-f78e5-default-rtdb.firebaseio.com",
+            projectId: "my-expense-tracker-f78e5",
+            storageBucket: "my-expense-tracker-f78e5.firebasestorage.app",
+            messagingSenderId: "746955029538",
+            appId: "1:746955029538:web:b4afc994bf65a6444ade7b"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const database = getDatabase(app);
+
+        // Your categories with subcategories
+        const CATEGORIES = [
+            { name: 'Food', subcategories: ['Eating out', 'Ordering in'] },
+            { name: 'Groceries', subcategories: [] },
+            { name: 'Utilities', subcategories: ['Fuel', 'Parking', 'Internet', 'Mobile', 'Electricity', 'Water', 'Property', 'Cab'] },
+            { name: 'Insurance', subcategories: ['Motor', 'Medical', 'Term'] },
+            { name: 'Health', subcategories: ['Medicines', 'Tests', 'Doctor visits'] },
+            { name: 'Entertainment', subcategories: ['Movies', 'Football'] },
+            { name: 'Shopping', subcategories: ['Clothes', 'Shoes', 'House'] },
+            { name: 'Miscellaneous', subcategories: ['Gifts', 'Everything Else'] }
+        ];
+
+        let currentUser = null;
+
+        // Auth state observer
+        onAuthStateChanged(auth, (user) => {
+            document.getElementById('loadingScreen').style.display = 'none';
+            
+            if (user) {
+                currentUser = user;
+                showApp();
+                loadExpenses();
+            } else {
+                showAuth();
+            }
+        });
+
+        function showAuth() {
+            document.getElementById('authScreen').style.display = 'block';
+            document.getElementById('appScreen').style.display = 'none';
+        }
+
+        function showApp() {
+            document.getElementById('authScreen').style.display = 'none';
+            document.getElementById('appScreen').style.display = 'block';
+            document.getElementById('userEmail').textContent = currentUser.email;
+            setupExpenseTracker();
+        }
+
+        window.showLogin = function() {
+            document.getElementById('loginForm').style.display = 'block';
+            document.getElementById('signupForm').style.display = 'none';
+            document.getElementById('errorMessage').style.display = 'none';
+        };
+
+        window.showSignup = function() {
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('signupForm').style.display = 'block';
+            document.getElementById('errorMessage').style.display = 'none';
+        };
+
+        window.login = async function() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+            } catch (error) {
+                showError(error.message);
+            }
+        };
+
+        window.signup = async function() {
+            const email = document.getElementById('signupEmail').value;
+            const password = document.getElementById('signupPassword').value;
+            
+            if (password.length < 6) {
+                showError('Password must be at least 6 characters');
+                return;
+            }
+            
+            try {
+                await createUserWithEmailAndPassword(auth, email, password);
+            } catch (error) {
+                showError(error.message);
+            }
+        };
+
+        window.logout = async function() {
+            try {
+                await signOut(auth);
+            } catch (error) {
+                alert('Error logging out');
+            }
+        };
+
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message.replace('Firebase: ', '');
+            errorDiv.style.display = 'block';
+        }
+
+        function setSyncStatus(status) {
+            const statusDiv = document.getElementById('syncStatus');
+            statusDiv.className = 'sync-status';
+            
+            if (status === 'syncing') {
+                statusDiv.textContent = '⏳ Syncing...';
+                statusDiv.classList.add('syncing');
+            } else if (status === 'synced') {
+                statusDiv.textContent = '✓ Synced';
+                statusDiv.classList.add('synced');
+                setTimeout(() => {
+                    statusDiv.textContent = 'Ready';
+                    statusDiv.className = 'sync-status';
+                }, 2000);
+            } else {
+                statusDiv.textContent = 'Ready';
+            }
+        }
+
+        function setupExpenseTracker() {
+            showDate();
+            setDefaultDate();
+            populateCategories();
+            
+            document.getElementById('category').addEventListener('change', function() {
+                updateSubcategoryDropdown(this.value);
+            });
+        }
+
+        function showDate() {
+            const now = new Date();
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('dateDisplay').textContent = now.toLocaleDateString('en-IN', options);
+        }
+
+        function setDefaultDate() {
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            const day = String(today.getDate()).padStart(2, '0');
+            document.getElementById('expenseDate').value = `${year}-${month}-${day}`;
+        }
+
+        function populateCategories() {
+            const select = document.getElementById('category');
+            let html = '<option value="">Select category</option>';
+            CATEGORIES.forEach(cat => {
+                html += `<option value="${cat.name}">${cat.name}</option>`;
+            });
+            select.innerHTML = html;
+        }
+
+        function updateSubcategoryDropdown(categoryName) {
+            const group = document.getElementById('subcategoryGroup');
+            const select = document.getElementById('subcategory');
+            
+            if (!categoryName) {
+                group.style.display = 'none';
+                return;
+            }
+            
+            const category = CATEGORIES.find(c => c.name === categoryName);
+            
+            if (!category || !category.subcategories || category.subcategories.length === 0) {
+                group.style.display = 'none';
+                return;
+            }
+            
+            let html = '<option value="">Select subcategory</option>';
+            category.subcategories.forEach(sub => {
+                html += `<option value="${sub}">${sub}</option>`;
+            });
+            select.innerHTML = html;
+            group.style.display = 'block';
+        }
+
+        window.addExpense = async function() {
+            const amount = document.getElementById('amount').value;
+            const date = document.getElementById('expenseDate').value;
+            const description = document.getElementById('description').value;
+            const category = document.getElementById('category').value;
+            const subcategory = document.getElementById('subcategory').value;
+            
+            if (!amount || !date || !description || !category) {
+                alert('Please fill in all required fields');
+                return;
+            }
+            
+            const expense = {
+                amount: parseFloat(amount),
+                date: date,
+                description: description,
+                category: category,
+                subcategory: subcategory || '',
+                timestamp: Date.now()
+            };
+            
+            setSyncStatus('syncing');
+            
+            try {
+                const expensesRef = ref(database, `users/${currentUser.uid}/expenses`);
+                await push(expensesRef, expense);
+                
+                // Clear form
+                document.getElementById('amount').value = '';
+                document.getElementById('description').value = '';
+                document.getElementById('category').value = '';
+                document.getElementById('subcategory').value = '';
+                document.getElementById('subcategoryGroup').style.display = 'none';
+                setDefaultDate();
+                
+                setSyncStatus('synced');
+                switchTab('list');
+            } catch (error) {
+                alert('Error adding expense');
+                console.error(error);
+            }
+        };
+
+        function loadExpenses() {
+            const expensesRef = ref(database, `users/${currentUser.uid}/expenses`);
+            
+            onValue(expensesRef, (snapshot) => {
+                const expenses = [];
+                snapshot.forEach((child) => {
+                    expenses.push({
+                        id: child.key,
+                        ...child.val()
+                    });
+                });
+                
+                // Sort by date descending
+                expenses.sort((a, b) => new Date(b.date) - new Date(a.date));
+                
+                displayExpenses(expenses);
+                calculateTotals(expenses);
+            });
+        }
+
+        function displayExpenses(expenses) {
+            const list = document.getElementById('expensesList');
+            
+            if (expenses.length === 0) {
+                list.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📝</div>
+                        <p>No expenses yet. Add your first expense!</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            let html = '';
+            expenses.forEach(exp => {
+                const date = new Date(exp.date);
+                const dateStr = date.toLocaleDateString('en-IN', { 
+                    month: 'short', 
+                    day: 'numeric',
+                    year: 'numeric'
+                });
+                
+                html += `
+                    <div class="expense-item">
+                        <div class="expense-info">
+                            <div class="expense-description">${exp.description}</div>
+                            <div class="expense-meta">
+                                <span class="expense-category">${exp.category}</span>
+                                ${exp.subcategory ? `<span class="expense-category expense-subcategory">${exp.subcategory}</span>` : ''}
+                                <span>${dateStr}</span>
+                            </div>
+                        </div>
+                        <div class="expense-amount">₹${exp.amount.toFixed(2)}</div>
+                        <button class="delete-btn" onclick="deleteExpense('${exp.id}')">×</button>
+                    </div>
+                `;
+            });
+            
+            list.innerHTML = html;
+        }
+
+        function calculateTotals(expenses) {
+            const today = new Date().toDateString();
+            const thisMonth = new Date().getMonth();
+            const thisYear = new Date().getFullYear();
+            
+            let todayTotal = 0;
+            let monthTotal = 0;
+            
+            expenses.forEach(exp => {
+                const expDate = new Date(exp.date);
+                
+                if (expDate.toDateString() === today) {
+                    todayTotal += exp.amount;
+                }
+                
+                if (expDate.getMonth() === thisMonth && expDate.getFullYear() === thisYear) {
+                    monthTotal += exp.amount;
+                }
+            });
+            
+            document.getElementById('todayTotal').textContent = todayTotal.toFixed(2);
+            document.getElementById('monthTotal').textContent = monthTotal.toFixed(2);
+        }
+
+        window.deleteExpense = async function(expenseId) {
+            if (!confirm('Delete this expense?')) return;
+            
+            setSyncStatus('syncing');
+            
+            try {
+                const expenseRef = ref(database, `users/${currentUser.uid}/expenses/${expenseId}`);
+                await remove(expenseRef);
+                setSyncStatus('synced');
+            } catch (error) {
+                alert('Error deleting expense');
+                console.error(error);
+            }
+        };
+
+        window.switchTab = function(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.view-content').forEach(v => v.classList.remove('active'));
+            
+            if (tab === 'add') {
+                document.querySelectorAll('.tab')[0].classList.add('active');
+                document.getElementById('addView').classList.add('active');
+            } else if (tab === 'list') {
+                document.querySelectorAll('.tab')[1].classList.add('active');
+                document.getElementById('listView').classList.add('active');
+            }
+        };
+    </script>
+</body>
+</html>
