@@ -390,6 +390,109 @@
             font-size: 18px;
             color: #666;
         }
+
+        /* Analytics Cards */
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .analytics-card {
+            background: #ffffff;
+            border: 2px solid #000000;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 4px 4px 0px #000000;
+        }
+
+        .analytics-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .analytics-card-category {
+            font-size: 14px;
+            font-weight: 600;
+            color: #666;
+        }
+
+        .analytics-card-amount {
+            font-size: 24px;
+            font-weight: bold;
+            color: #000000;
+            margin-bottom: 8px;
+        }
+
+        .analytics-card-period {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .analytics-card-percent {
+            font-size: 12px;
+            color: #666;
+            margin-top: 8px;
+        }
+
+        .expense-item {
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .expense-item:hover {
+            background: #f5f5f5;
+        }
+
+        /* Edit Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border: 2px solid #000;
+            border-radius: 8px;
+            padding: 30px;
+            max-width: 400px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 8px 8px 0px #000000;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+        }
     </style>
 </head>
 <body>
@@ -459,6 +562,7 @@
             <div class="tabs">
                 <div class="tab active" onclick="switchTab('add')">Add Expense</div>
                 <div class="tab" onclick="switchTab('list')">Expenses</div>
+                <div class="tab" onclick="switchTab('analytics')">Analytics</div>
             </div>
 
             <div id="addView" class="view-content active">
@@ -487,8 +591,8 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="description">Description</label>
-                        <input type="text" id="description" placeholder="What did you spend on?">
+                        <label for="description">Description <span style="color:#999; font-weight:400;">(optional)</span></label>
+                        <input type="text" id="description" placeholder="What did you spend on? (optional)">
                     </div>
 
                     <div class="form-group">
@@ -515,6 +619,50 @@
                     <div id="expensesList" class="expenses-list"></div>
                 </div>
             </div>
+
+            <div id="analyticsView" class="view-content">
+                <div class="card">
+                    <h2 style="margin-bottom: 20px; color: #000;">This Month</h2>
+                    <div id="analyticsGrid" class="analytics-grid"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Expense Modal -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 style="color: #000;">Edit Expense</h2>
+                <button class="modal-close" onclick="closeEditModal()">×</button>
+            </div>
+            
+            <div class="form-group">
+                <label for="editAmount">Amount (₹)</label>
+                <input type="number" id="editAmount" min="0" step="0.01">
+            </div>
+
+            <div class="form-group">
+                <label for="editDate">Date</label>
+                <input type="date" id="editDate">
+            </div>
+
+            <div class="form-group">
+                <label for="editDescription">Description</label>
+                <input type="text" id="editDescription">
+            </div>
+
+            <div class="form-group">
+                <label for="editCategory">Category</label>
+                <select id="editCategory"></select>
+            </div>
+
+            <div class="form-group subcategory-group" id="editSubcategoryGroup">
+                <label for="editSubcategory">Subcategory</label>
+                <select id="editSubcategory"></select>
+            </div>
+
+            <button class="btn" onclick="saveEdit()">Save Changes</button>
         </div>
     </div>
 
@@ -714,15 +862,15 @@
             const category = document.getElementById('category').value;
             const subcategory = document.getElementById('subcategory').value;
             
-            if (!amount || !date || !description || !category) {
-                alert('Please fill in all required fields');
+            if (!amount || !date || !category) {
+                alert('Please fill in amount, date, and category');
                 return;
             }
             
             const expense = {
                 amount: parseFloat(amount),
                 date: date,
-                description: description,
+                description: description || 'No description',
                 category: category,
                 subcategory: subcategory || '',
                 timestamp: Date.now()
@@ -793,7 +941,7 @@
                 });
                 
                 html += `
-                    <div class="expense-item">
+                    <div class="expense-item" onclick="openEditModal('${exp.id}', ${exp.amount}, '${exp.date}', '${escapeQuotes(exp.description)}', '${exp.category}', '${exp.subcategory || ''}')">
                         <div class="expense-info">
                             <div class="expense-description">${exp.description}</div>
                             <div class="expense-meta">
@@ -803,7 +951,7 @@
                             </div>
                         </div>
                         <div class="expense-amount">₹${exp.amount.toFixed(2)}</div>
-                        <button class="delete-btn" onclick="deleteExpense('${exp.id}')">×</button>
+                        <button class="delete-btn" onclick="event.stopPropagation(); deleteExpense('${exp.id}')">×</button>
                     </div>
                 `;
             });
@@ -860,8 +1008,186 @@
             } else if (tab === 'list') {
                 document.querySelectorAll('.tab')[1].classList.add('active');
                 document.getElementById('listView').classList.add('active');
+            } else if (tab === 'analytics') {
+                document.querySelectorAll('.tab')[2].classList.add('active');
+                document.getElementById('analyticsView').classList.add('active');
+                generateAnalytics();
             }
         };
+
+        // Helper function to escape quotes
+        function escapeQuotes(str) {
+            return str.replace(/'/g, "\\'").replace(/"/g, '\\"');
+        }
+
+        // Edit Modal Functions
+        let currentEditId = null;
+
+        window.openEditModal = function(id, amount, date, description, category, subcategory) {
+            currentEditId = id;
+            document.getElementById('editAmount').value = amount;
+            document.getElementById('editDate').value = date;
+            document.getElementById('editDescription').value = description;
+            
+            // Populate categories in edit modal
+            const editCatSelect = document.getElementById('editCategory');
+            let html = '<option value="">Select category</option>';
+            CATEGORIES.forEach(cat => {
+                const selected = cat.name === category ? 'selected' : '';
+                html += `<option value="${cat.name}" ${selected}>${cat.name}</option>`;
+            });
+            editCatSelect.innerHTML = html;
+            
+            // Handle subcategory
+            if (category) {
+                updateEditSubcategory(category, subcategory);
+            }
+            
+            // Show listener for category change in edit
+            editCatSelect.onchange = function() {
+                updateEditSubcategory(this.value, '');
+            };
+            
+            document.getElementById('editModal').classList.add('active');
+        };
+
+        window.closeEditModal = function() {
+            document.getElementById('editModal').classList.remove('active');
+            currentEditId = null;
+        };
+
+        function updateEditSubcategory(categoryName, selectedSub) {
+            const group = document.getElementById('editSubcategoryGroup');
+            const select = document.getElementById('editSubcategory');
+            
+            if (!categoryName) {
+                group.style.display = 'none';
+                return;
+            }
+            
+            const category = CATEGORIES.find(c => c.name === categoryName);
+            if (!category || !category.subcategories || category.subcategories.length === 0) {
+                group.style.display = 'none';
+                return;
+            }
+            
+            let html = '<option value="">Select subcategory</option>';
+            category.subcategories.forEach(sub => {
+                const selected = sub === selectedSub ? 'selected' : '';
+                html += `<option value="${sub}" ${selected}>${sub}</option>`;
+            });
+            select.innerHTML = html;
+            group.style.display = 'block';
+        }
+
+        window.saveEdit = async function() {
+            const amount = parseFloat(document.getElementById('editAmount').value);
+            const date = document.getElementById('editDate').value;
+            const description = document.getElementById('editDescription').value || 'No description';
+            const category = document.getElementById('editCategory').value;
+            const subcategory = document.getElementById('editSubcategory').value;
+            
+            if (!amount || !date || !category) {
+                alert('Please fill in amount, date, and category');
+                return;
+            }
+            
+            setSyncStatus('syncing');
+            
+            try {
+                const expenseRef = ref(database, `users/${currentUser.uid}/expenses/${currentEditId}`);
+                await set(expenseRef, {
+                    amount: amount,
+                    date: date,
+                    description: description,
+                    category: category,
+                    subcategory: subcategory || '',
+                    timestamp: Date.now()
+                });
+                
+                setSyncStatus('synced');
+                closeEditModal();
+            } catch (error) {
+                alert('Error updating expense');
+                console.error(error);
+            }
+        };
+
+        // Analytics Functions
+        function generateAnalytics() {
+            const expensesRef = ref(database, `users/${currentUser.uid}/expenses`);
+            
+            onValue(expensesRef, (snapshot) => {
+                const expenses = [];
+                snapshot.forEach((child) => {
+                    expenses.push({
+                        id: child.key,
+                        ...child.val()
+                    });
+                });
+                
+                // Filter this month's expenses
+                const now = new Date();
+                const thisMonth = now.getMonth();
+                const thisYear = now.getFullYear();
+                
+                const monthlyExpenses = expenses.filter(exp => {
+                    const expDate = new Date(exp.date);
+                    return expDate.getMonth() === thisMonth && expDate.getFullYear() === thisYear;
+                });
+                
+                // Group by category
+                const categoryTotals = {};
+                let total = 0;
+                
+                monthlyExpenses.forEach(exp => {
+                    if (!categoryTotals[exp.category]) {
+                        categoryTotals[exp.category] = 0;
+                    }
+                    categoryTotals[exp.category] += exp.amount;
+                    total += exp.amount;
+                });
+                
+                // Display cards
+                displayAnalyticsCards(categoryTotals, total);
+            }, { onlyOnce: true });
+        }
+
+        function displayAnalyticsCards(categoryTotals, total) {
+            const grid = document.getElementById('analyticsGrid');
+            
+            if (total === 0) {
+                grid.innerHTML = '<div class="empty-state" style="grid-column: 1/-1;"><p>No expenses this month</p></div>';
+                return;
+            }
+            
+            const colors = ['#E8F5E9', '#FFF3E0', '#E3F2FD', '#FCE4EC', '#F3E5F5', '#E0F2F1', '#FFF8E1', '#EFEBE9'];
+            let html = '';
+            let colorIndex = 0;
+            
+            // Sort by amount
+            const sorted = Object.entries(categoryTotals).sort((a, b) => b[1] - a[1]);
+            
+            sorted.forEach(([category, amount]) => {
+                const percent = ((amount / total) * 100).toFixed(1);
+                const bgColor = colors[colorIndex % colors.length];
+                
+                html += `
+                    <div class="analytics-card" style="background: ${bgColor};">
+                        <div class="analytics-card-header">
+                            <div class="analytics-card-category">${category}</div>
+                        </div>
+                        <div class="analytics-card-amount">₹${amount.toFixed(2)}</div>
+                        <div class="analytics-card-period">Monthly</div>
+                        <div class="analytics-card-percent">${percent}% of total</div>
+                    </div>
+                `;
+                colorIndex++;
+            });
+            
+            grid.innerHTML = html;
+        }
     </script>
 </body>
 </html>
+
