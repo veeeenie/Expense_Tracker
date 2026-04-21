@@ -45,6 +45,11 @@
             box-sizing: border-box;
         }
 
+        html {
+            overflow-x: hidden;
+            width: 100%;
+        }
+
         body {
             font-family: Calibri, 'Segoe UI', Tahoma, sans-serif;
             background: var(--bg-primary);
@@ -52,13 +57,17 @@
             color: var(--text-primary);
             transition: background 0.3s ease, color 0.3s ease;
             overflow-x: hidden;
+            width: 100%;
+            position: relative;
         }
 
         .container {
             max-width: 500px;
+            width: 100%;
             margin: 0 auto;
             padding: 12px;
             padding-bottom: 30px;
+            overflow-x: hidden;
         }
 
         @media (max-width: 400px) {
@@ -161,7 +170,6 @@
         input:focus, select:focus {
             outline: none;
             border-color: var(--border-color);
-            box-shadow: 2px 2px 0px var(--shadow-color);
         }
 
         .btn {
@@ -228,7 +236,11 @@
             border-radius: 8px;
             padding: 15px;
             margin-bottom: 15px;
-            box-shadow: 4px 4px 0px var(--shadow-color);
+        }
+
+        .card h2 {
+            margin-bottom: 15px;
+            color: var(--text-primary);
         }
 
         .summary {
@@ -488,7 +500,6 @@
             border: 2px solid var(--border-color);
             border-radius: 8px;
             padding: 15px;
-            box-shadow: 3px 3px 0px var(--shadow-color);
         }
 
         [data-theme="dark"] .analytics-card {
@@ -564,7 +575,6 @@
             width: 90%;
             max-height: 90vh;
             overflow-y: auto;
-            box-shadow: 4px 4px 0px var(--shadow-color);
         }
 
         .modal-header {
