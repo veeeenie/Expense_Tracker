@@ -158,13 +158,19 @@
 
         input, select {
             width: 100%;
-            padding: 14px;
+            max-width: 100%;
+            padding: 12px;
             border: 2px solid var(--border-color);
             border-radius: 6px;
             font-size: 16px;
             font-family: Calibri, 'Segoe UI', Tahoma, sans-serif;
             background: var(--bg-card);
             color: var(--text-primary);
+        }
+
+        input[type="date"] {
+            -webkit-appearance: none;
+            appearance: none;
         }
 
         input:focus, select:focus {
@@ -281,35 +287,16 @@
             font-weight: bold;
         }
 
-        .tabs {
-            display: flex;
-            gap: 10px;
+        .navigation {
             margin-bottom: 20px;
-            border-bottom: 2px solid var(--border-color);
-            padding-bottom: 0;
         }
 
-        .tab {
-            padding: 12px 24px;
-            background: var(--bg-card);
-            border: 2px solid var(--border-color);
-            border-bottom: none;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 15px;
-            border-radius: 6px 6px 0 0;
-            font-family: Calibri, 'Segoe UI', Tahoma, sans-serif;
-            letter-spacing: 0.5px;
+        .navigation label {
             color: var(--text-primary);
         }
 
-        .tab:hover {
-            background: var(--bg-secondary);
-        }
-
-        .tab.active {
-            background: var(--accent-bg);
-            color: var(--accent-text);
+        .navigation select {
+            cursor: pointer;
         }
 
         .view-content {
@@ -669,11 +656,14 @@
             <div id="syncStatus" class="sync-status">Ready</div>
             <div class="date-display" id="dateDisplay"></div>
 
-            <div class="tabs">
-                <div class="tab active" onclick="switchTab('add')">Add Expense</div>
-                <div class="tab" onclick="switchTab('list')">Expenses</div>
-                <div class="tab" onclick="switchTab('analytics')">Analytics</div>
-                <div class="tab" onclick="switchTab('income')">Income</div>
+            <div class="navigation">
+                <label for="viewSelector" style="font-weight: 600; margin-bottom: 8px; display: block;">Navigate to:</label>
+                <select id="viewSelector" onchange="switchTab(this.value)" style="width: 100%; padding: 12px; font-size: 16px; font-weight: 600;">
+                    <option value="add">💰 Add Expense</option>
+                    <option value="list">📋 View Expenses</option>
+                    <option value="analytics">📊 Analytics</option>
+                    <option value="income">💵 Income</option>
+                </select>
             </div>
 
             <div id="addView" class="view-content active">
@@ -1198,21 +1188,18 @@
         };
 
         window.switchTab = function(tab) {
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            // Hide all views
             document.querySelectorAll('.view-content').forEach(v => v.classList.remove('active'));
             
+            // Show selected view
             if (tab === 'add') {
-                document.querySelectorAll('.tab')[0].classList.add('active');
                 document.getElementById('addView').classList.add('active');
             } else if (tab === 'list') {
-                document.querySelectorAll('.tab')[1].classList.add('active');
                 document.getElementById('listView').classList.add('active');
             } else if (tab === 'analytics') {
-                document.querySelectorAll('.tab')[2].classList.add('active');
                 document.getElementById('analyticsView').classList.add('active');
                 generateAnalytics();
             } else if (tab === 'income') {
-                document.querySelectorAll('.tab')[3].classList.add('active');
                 document.getElementById('incomeView').classList.add('active');
                 setDefaultIncomeDate();
                 loadIncome();
@@ -1393,7 +1380,7 @@
         }
 
         // DARK MODE FUNCTIONS
-        function toggleDarkMode() {
+        window.toggleDarkMode = function() {
             const html = document.documentElement;
             const currentTheme = html.getAttribute('data-theme');
             const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
@@ -1402,17 +1389,19 @@
             localStorage.setItem('theme', newTheme);
             
             const toggle = document.getElementById('themeToggle');
-            toggle.textContent = newTheme === 'dark' ? '☀️' : '🌙';
-        }
+            if (toggle) {
+                toggle.textContent = newTheme === 'dark' ? '☀️' : '🌙';
+            }
+        };
 
-        function loadTheme() {
+        window.loadTheme = function() {
             const savedTheme = localStorage.getItem('theme') || 'light';
             document.documentElement.setAttribute('data-theme', savedTheme);
             const toggle = document.getElementById('themeToggle');
             if (toggle) {
                 toggle.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
             }
-        }
+        };
 
         // INCOME FUNCTIONS
         function setDefaultIncomeDate() {
