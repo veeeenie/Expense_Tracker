@@ -734,12 +734,46 @@
 
             <div id="analyticsView" class="view-content">
                 <div class="card">
-                    <h2 style="margin-bottom: 20px; color: #000;">This Month</h2>
+                    <h2 style="margin-bottom: 15px;">Analytics</h2>
+                    
+                    <div class="form-group">
+                        <label for="analyticsMonth">Select Month</label>
+                        <select id="analyticsMonth" onchange="generateAnalytics()">
+                            <option value="current">This Month</option>
+                            <option value="last">Last Month</option>
+                            <option value="last30">Last 30 Days</option>
+                            <option value="last90">Last 90 Days</option>
+                            <option value="all">All Time</option>
+                        </select>
+                    </div>
+
                     <div id="analyticsGrid" class="analytics-grid"></div>
+                </div>
+
+                <!-- Spending vs Income Chart -->
+                <div class="card">
+                    <h2 style="margin-bottom: 15px;">Spending vs Income</h2>
+                    <div id="spendingIncomeChart"></div>
+                </div>
+
+                <!-- Week Breakdown -->
+                <div class="card">
+                    <h2 style="margin-bottom: 15px;">Weekly Breakdown</h2>
+                    <div id="weeklyBreakdown"></div>
                 </div>
             </div>
 
             <div id="incomeView" class="view-content">
+                <!-- Budget Management -->
+                <div class="card">
+                    <h2 style="margin-bottom: 20px;">Monthly Budgets</h2>
+                    <div id="budgetList"></div>
+                    <button class="btn-secondary" onclick="showBudgetModal()" style="margin-top: 15px; width: 100%; padding: 12px;">
+                        Set Category Budgets
+                    </button>
+                </div>
+
+                <!-- Add Income -->
                 <div class="card">
                     <h2 style="margin-bottom: 20px;">Add Income</h2>
                     
@@ -772,9 +806,39 @@
                     <button class="btn" onclick="addIncome()">Add Income</button>
                 </div>
 
+                <!-- Income List -->
                 <div class="card">
                     <h2 style="margin-bottom: 20px;">Your Income</h2>
                     <div id="incomeList" class="expenses-list"></div>
+                </div>
+
+                <!-- Settings & Data -->
+                <div class="card">
+                    <h2 style="margin-bottom: 20px;">Data Management</h2>
+                    
+                    <button class="btn-secondary" onclick="backupData()" style="margin-bottom: 10px; width: 100%; padding: 12px;">
+                        📥 Backup All Data
+                    </button>
+                    
+                    <button class="btn-secondary" onclick="document.getElementById('restoreInput').click()" style="margin-bottom: 10px; width: 100%; padding: 12px;">
+                        📤 Restore from Backup
+                    </button>
+                    <input type="file" id="restoreInput" accept=".json" style="display: none;" onchange="restoreData(event)">
+                    
+                    <button class="btn-secondary" onclick="document.getElementById('importCSV').click()" style="margin-bottom: 10px; width: 100%; padding: 12px;">
+                        📊 Import CSV
+                    </button>
+                    <input type="file" id="importCSV" accept=".csv" style="display: none;" onchange="importCSV(event)">
+                    
+                    <div class="form-group" style="margin-top: 15px;">
+                        <label for="currencySelect">Currency</label>
+                        <select id="currencySelect" onchange="setCurrency(this.value)">
+                            <option value="₹">₹ Indian Rupee</option>
+                            <option value="$">$ US Dollar</option>
+                            <option value="€">€ Euro</option>
+                            <option value="£">£ British Pound</option>
+                        </select>
+                    </div>
                 </div>
             </div>
         </div>
@@ -846,6 +910,20 @@
             </div>
 
             <button class="btn" onclick="exportCustomRange()">Export Custom Range</button>
+        </div>
+    </div>
+
+    <!-- Budget Management Modal -->
+    <div id="budgetModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Set Monthly Budgets</h2>
+                <button class="modal-close" onclick="closeBudgetModal()">×</button>
+            </div>
+            
+            <div id="budgetInputs"></div>
+            
+            <button class="btn" onclick="saveBudgets()">Save Budgets</button>
         </div>
     </div>
 
@@ -1075,7 +1153,7 @@
                 setDefaultDate();
                 
                 setSyncStatus('synced');
-                switchTab('list');
+                // Stay on Add Expense screen - don't redirect
             } catch (error) {
                 alert('Error adding expense');
                 console.error(error);
@@ -1203,6 +1281,8 @@
                 document.getElementById('incomeView').classList.add('active');
                 setDefaultIncomeDate();
                 loadIncome();
+                loadBudgets().then(() => displayBudgets());
+                loadCurrency();
             }
         };
 
@@ -1306,42 +1386,82 @@
 
         // Analytics Functions
         function generateAnalytics() {
+            const period = document.getElementById('analyticsMonth')?.value || 'current';
             const expensesRef = ref(database, `users/${currentUser.uid}/expenses`);
+            const incomeRef = ref(database, `users/${currentUser.uid}/income`);
             
-            onValue(expensesRef, (snapshot) => {
+            // Get both expenses and income
+            Promise.all([
+                get(expensesRef),
+                get(incomeRef)
+            ]).then(([expensesSnap, incomeSnap]) => {
                 const expenses = [];
-                snapshot.forEach((child) => {
-                    expenses.push({
-                        id: child.key,
-                        ...child.val()
-                    });
+                expensesSnap.forEach((child) => {
+                    expenses.push({ id: child.key, ...child.val() });
                 });
                 
-                // Filter this month's expenses
-                const now = new Date();
-                const thisMonth = now.getMonth();
-                const thisYear = now.getFullYear();
-                
-                const monthlyExpenses = expenses.filter(exp => {
-                    const expDate = new Date(exp.date);
-                    return expDate.getMonth() === thisMonth && expDate.getFullYear() === thisYear;
+                const income = [];
+                incomeSnap.forEach((child) => {
+                    income.push({ id: child.key, ...child.val() });
                 });
                 
-                // Group by category
+                // Filter by period
+                const filteredExpenses = filterByPeriod(expenses, period);
+                const filteredIncome = filterByPeriod(income, period);
+                
+                // Group expenses by category
                 const categoryTotals = {};
-                let total = 0;
+                let totalExpenses = 0;
                 
-                monthlyExpenses.forEach(exp => {
+                filteredExpenses.forEach(exp => {
                     if (!categoryTotals[exp.category]) {
                         categoryTotals[exp.category] = 0;
                     }
                     categoryTotals[exp.category] += exp.amount;
-                    total += exp.amount;
+                    totalExpenses += exp.amount;
                 });
                 
-                // Display cards
-                displayAnalyticsCards(categoryTotals, total);
-            }, { onlyOnce: true });
+                // Calculate total income
+                let totalIncome = 0;
+                filteredIncome.forEach(inc => {
+                    totalIncome += inc.amount;
+                });
+                
+                // Display all analytics
+                displayAnalyticsCards(categoryTotals, totalExpenses);
+                displaySpendingIncomeChart(totalIncome, totalExpenses);
+                displayWeeklyBreakdown(filteredExpenses);
+            }).catch(error => {
+                console.error('Error loading analytics:', error);
+            });
+        }
+
+        function filterByPeriod(data, period) {
+            const now = new Date();
+            
+            return data.filter(item => {
+                const itemDate = new Date(item.date);
+                
+                switch(period) {
+                    case 'current':
+                        return itemDate.getMonth() === now.getMonth() && 
+                               itemDate.getFullYear() === now.getFullYear();
+                    case 'last':
+                        const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+                        return itemDate.getMonth() === lastMonth.getMonth() && 
+                               itemDate.getFullYear() === lastMonth.getFullYear();
+                    case 'last30':
+                        const days30Ago = new Date(now.getTime() - (30 * 24 * 60 * 60 * 1000));
+                        return itemDate >= days30Ago;
+                    case 'last90':
+                        const days90Ago = new Date(now.getTime() - (90 * 24 * 60 * 60 * 1000));
+                        return itemDate >= days90Ago;
+                    case 'all':
+                        return true;
+                    default:
+                        return true;
+                }
+            });
         }
 
         function displayAnalyticsCards(categoryTotals, total) {
@@ -1379,11 +1499,100 @@
             grid.innerHTML = html;
         }
 
+        function displaySpendingIncomeChart(income, expenses) {
+            const chart = document.getElementById('spendingIncomeChart');
+            const balance = income - expenses;
+            const maxValue = Math.max(income, expenses) || 1;
+            
+            const incomePercent = (income / maxValue) * 100;
+            const expensesPercent = (expenses / maxValue) * 100;
+            
+            chart.innerHTML = `
+                <div style="margin-bottom: 20px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                        <span style="font-weight: 600; color: var(--text-primary);">Income</span>
+                        <span style="font-weight: bold; color: #28a745;">₹${income.toFixed(2)}</span>
+                    </div>
+                    <div style="background: #e0e0e0; height: 30px; border-radius: 4px; overflow: hidden;">
+                        <div style="background: #28a745; height: 100%; width: ${incomePercent}%;"></div>
+                    </div>
+                </div>
+                
+                <div style="margin-bottom: 20px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                        <span style="font-weight: 600; color: var(--text-primary);">Expenses</span>
+                        <span style="font-weight: bold; color: #dc3545;">₹${expenses.toFixed(2)}</span>
+                    </div>
+                    <div style="background: #e0e0e0; height: 30px; border-radius: 4px; overflow: hidden;">
+                        <div style="background: #dc3545; height: 100%; width: ${expensesPercent}%;"></div>
+                    </div>
+                </div>
+                
+                <div style="padding: 15px; background: ${balance >= 0 ? '#d4edda' : '#f8d7da'}; border-radius: 8px; border: 2px solid ${balance >= 0 ? '#28a745' : '#dc3545'};">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span style="font-weight: 600; color: #000;">Balance</span>
+                        <span style="font-weight: bold; font-size: 20px; color: ${balance >= 0 ? '#28a745' : '#dc3545'};">
+                            ₹${balance.toFixed(2)}
+                        </span>
+                    </div>
+                </div>
+            `;
+        }
+
+        function displayWeeklyBreakdown(expenses) {
+            const weekDiv = document.getElementById('weeklyBreakdown');
+            
+            if (expenses.length === 0) {
+                weekDiv.innerHTML = '<p style="color: var(--text-secondary);">No expenses to show</p>';
+                return;
+            }
+            
+            // Group by week
+            const weeklyData = {};
+            expenses.forEach(exp => {
+                const date = new Date(exp.date);
+                const weekStart = new Date(date);
+                weekStart.setDate(date.getDate() - date.getDay());
+                const weekKey = weekStart.toISOString().split('T')[0];
+                
+                if (!weeklyData[weekKey]) {
+                    weeklyData[weekKey] = 0;
+                }
+                weeklyData[weekKey] += exp.amount;
+            });
+            
+            const sorted = Object.entries(weeklyData).sort((a, b) => b[0].localeCompare(a[0]));
+            const maxAmount = Math.max(...sorted.map(w => w[1])) || 1;
+            
+            let html = '';
+            sorted.forEach(([week, amount]) => {
+                const weekDate = new Date(week);
+                const weekLabel = weekDate.toLocaleDateString('en-IN', { month: 'short', day: 'numeric' });
+                const percent = (amount / maxAmount) * 100;
+                
+                html += `
+                    <div style="margin-bottom: 15px;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                            <span style="font-weight: 600; color: var(--text-primary);">Week of ${weekLabel}</span>
+                            <span style="font-weight: bold; color: var(--text-primary);">₹${amount.toFixed(2)}</span>
+                        </div>
+                        <div style="background: #e0e0e0; height: 20px; border-radius: 4px; overflow: hidden;">
+                            <div style="background: #007bff; height: 100%; width: ${percent}%;"></div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            weekDiv.innerHTML = html;
+        }
+
         // DARK MODE FUNCTIONS
         window.toggleDarkMode = function() {
             const html = document.documentElement;
-            const currentTheme = html.getAttribute('data-theme');
+            const currentTheme = html.getAttribute('data-theme') || 'light';
             const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            
+            console.log('Toggling from', currentTheme, 'to', newTheme);
             
             html.setAttribute('data-theme', newTheme);
             localStorage.setItem('theme', newTheme);
@@ -1392,10 +1601,14 @@
             if (toggle) {
                 toggle.textContent = newTheme === 'dark' ? '☀️' : '🌙';
             }
+            
+            console.log('Dark mode toggled to:', newTheme);
         };
 
         window.loadTheme = function() {
             const savedTheme = localStorage.getItem('theme') || 'light';
+            console.log('Loading saved theme:', savedTheme);
+            
             document.documentElement.setAttribute('data-theme', savedTheme);
             const toggle = document.getElementById('themeToggle');
             if (toggle) {
@@ -1545,6 +1758,270 @@
                 alert('Error deleting income');
                 console.error(error);
             }
+        };
+
+        // BUDGET MANAGEMENT FUNCTIONS
+        let currentBudgets = {};
+
+        window.showBudgetModal = function() {
+            loadBudgets().then(() => {
+                const inputsDiv = document.getElementById('budgetInputs');
+                let html = '';
+                
+                CATEGORIES.forEach(cat => {
+                    const currentBudget = currentBudgets[cat.name] || 0;
+                    html += `
+                        <div class="form-group">
+                            <label for="budget_${cat.name}">${cat.name}</label>
+                            <input type="number" id="budget_${cat.name}" value="${currentBudget}" min="0" step="100" placeholder="Monthly budget">
+                        </div>
+                    `;
+                });
+                
+                inputsDiv.innerHTML = html;
+                document.getElementById('budgetModal').classList.add('active');
+            });
+        };
+
+        window.closeBudgetModal = function() {
+            document.getElementById('budgetModal').classList.remove('active');
+        };
+
+        window.saveBudgets = async function() {
+            const budgets = {};
+            
+            CATEGORIES.forEach(cat => {
+                const input = document.getElementById(`budget_${cat.name}`);
+                if (input && input.value) {
+                    budgets[cat.name] = parseFloat(input.value);
+                }
+            });
+            
+            try {
+                const budgetRef = ref(database, `users/${currentUser.uid}/budgets`);
+                await set(budgetRef, budgets);
+                currentBudgets = budgets;
+                closeBudgetModal();
+                displayBudgets();
+                alert('Budgets saved successfully!');
+            } catch (error) {
+                alert('Error saving budgets');
+                console.error(error);
+            }
+        };
+
+        async function loadBudgets() {
+            try {
+                const budgetRef = ref(database, `users/${currentUser.uid}/budgets`);
+                const snapshot = await get(budgetRef);
+                if (snapshot.exists()) {
+                    currentBudgets = snapshot.val();
+                } else {
+                    currentBudgets = {};
+                }
+            } catch (error) {
+                console.error('Error loading budgets:', error);
+                currentBudgets = {};
+            }
+        }
+
+        function displayBudgets() {
+            const budgetDiv = document.getElementById('budgetList');
+            
+            if (Object.keys(currentBudgets).length === 0) {
+                budgetDiv.innerHTML = '<p style="color: var(--text-secondary);">No budgets set. Click below to set category budgets.</p>';
+                return;
+            }
+            
+            // Get current month spending
+            const expensesRef = ref(database, `users/${currentUser.uid}/expenses`);
+            get(expensesRef).then(snapshot => {
+                const expenses = [];
+                snapshot.forEach(child => {
+                    expenses.push(child.val());
+                });
+                
+                const now = new Date();
+                const monthlyExpenses = expenses.filter(exp => {
+                    const expDate = new Date(exp.date);
+                    return expDate.getMonth() === now.getMonth() && expDate.getFullYear() === now.getFullYear();
+                });
+                
+                const categorySpending = {};
+                monthlyExpenses.forEach(exp => {
+                    if (!categorySpending[exp.category]) {
+                        categorySpending[exp.category] = 0;
+                    }
+                    categorySpending[exp.category] += exp.amount;
+                });
+                
+                let html = '';
+                Object.entries(currentBudgets).forEach(([category, budget]) => {
+                    const spent = categorySpending[category] || 0;
+                    const percent = (spent / budget) * 100;
+                    const isOverBudget = spent > budget;
+                    const color = isOverBudget ? '#dc3545' : (percent > 80 ? '#ffc107' : '#28a745');
+                    
+                    html += `
+                        <div style="margin-bottom: 15px;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                                <span style="font-weight: 600; color: var(--text-primary);">${category}</span>
+                                <span style="font-weight: bold; color: ${color};">₹${spent.toFixed(2)} / ₹${budget.toFixed(2)}</span>
+                            </div>
+                            <div style="background: #e0e0e0; height: 20px; border-radius: 4px; overflow: hidden;">
+                                <div style="background: ${color}; height: 100%; width: ${Math.min(percent, 100)}%;"></div>
+                            </div>
+                            ${isOverBudget ? '<p style="color: #dc3545; font-size: 12px; margin-top: 3px;">⚠️ Over budget!</p>' : ''}
+                        </div>
+                    `;
+                });
+                
+                budgetDiv.innerHTML = html;
+            });
+        }
+
+        // CURRENCY MANAGEMENT
+        let currentCurrency = '₹';
+
+        window.setCurrency = function(symbol) {
+            currentCurrency = symbol;
+            localStorage.setItem('currency', symbol);
+            alert(`Currency changed to ${symbol}. Page will reload.`);
+            location.reload();
+        };
+
+        function loadCurrency() {
+            const saved = localStorage.getItem('currency');
+            if (saved) {
+                currentCurrency = saved;
+                document.getElementById('currencySelect').value = saved;
+            }
+        }
+
+        // DATA IMPORT/EXPORT/BACKUP FUNCTIONS
+        window.backupData = async function() {
+            try {
+                const expensesRef = ref(database, `users/${currentUser.uid}/expenses`);
+                const incomeRef = ref(database, `users/${currentUser.uid}/income`);
+                const budgetsRef = ref(database, `users/${currentUser.uid}/budgets`);
+                
+                const [expensesSnap, incomeSnap, budgetsSnap] = await Promise.all([
+                    get(expensesRef),
+                    get(incomeRef),
+                    get(budgetsRef)
+                ]);
+                
+                const backup = {
+                    expenses: expensesSnap.val() || {},
+                    income: incomeSnap.val() || {},
+                    budgets: budgetsSnap.val() || {},
+                    exportDate: new Date().toISOString(),
+                    version: '1.0'
+                };
+                
+                const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                const date = new Date().toISOString().split('T')[0];
+                a.download = `expense-tracker-backup-${date}.json`;
+                a.click();
+                window.URL.revokeObjectURL(url);
+                
+                alert('Backup downloaded successfully!');
+            } catch (error) {
+                alert('Error creating backup');
+                console.error(error);
+            }
+        };
+
+        window.restoreData = async function(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            if (!confirm('This will replace ALL your current data. Are you sure?')) {
+                event.target.value = '';
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                try {
+                    const backup = JSON.parse(e.target.result);
+                    
+                    if (!backup.expenses || !backup.income) {
+                        alert('Invalid backup file');
+                        return;
+                    }
+                    
+                    const expensesRef = ref(database, `users/${currentUser.uid}/expenses`);
+                    const incomeRef = ref(database, `users/${currentUser.uid}/income`);
+                    const budgetsRef = ref(database, `users/${currentUser.uid}/budgets`);
+                    
+                    await Promise.all([
+                        set(expensesRef, backup.expenses),
+                        set(incomeRef, backup.income),
+                        set(budgetsRef, backup.budgets || {})
+                    ]);
+                    
+                    alert('Data restored successfully! Page will reload.');
+                    location.reload();
+                } catch (error) {
+                    alert('Error restoring backup');
+                    console.error(error);
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = '';
+        };
+
+        window.importCSV = async function(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                try {
+                    const csv = e.target.result;
+                    const lines = csv.split('\n');
+                    const expenses = [];
+                    
+                    for (let i = 1; i < lines.length; i++) {
+                        const line = lines[i].trim();
+                        if (!line) continue;
+                        
+                        const match = line.match(/^([^,]+),([^,]+),"([^"]*)","([^"]*)","([^"]*)"/);
+                        if (match) {
+                            expenses.push({
+                                date: match[1],
+                                amount: parseFloat(match[2]),
+                                category: match[3],
+                                subcategory: match[4],
+                                description: match[5],
+                                timestamp: Date.now()
+                            });
+                        }
+                    }
+                    
+                    if (expenses.length === 0) {
+                        alert('No valid expenses found in CSV');
+                        return;
+                    }
+                    
+                    const expensesRef = ref(database, `users/${currentUser.uid}/expenses`);
+                    for (const expense of expenses) {
+                        await push(expensesRef, expense);
+                    }
+                    
+                    alert(`Imported ${expenses.length} expenses successfully!`);
+                    switchTab('list');
+                } catch (error) {
+                    alert('Error importing CSV');
+                    console.error(error);
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = '';
         };
 
         // EXPORT MODAL FUNCTIONS
