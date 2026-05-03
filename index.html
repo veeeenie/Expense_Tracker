@@ -497,15 +497,25 @@
         .analytics-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
+            gap: 12px;
             margin-bottom: 20px;
+            width: 100%;
+            max-width: 100%;
+        }
+
+        @media (max-width: 400px) {
+            .analytics-grid {
+                gap: 10px;
+            }
         }
 
         .analytics-card {
             background: var(--bg-card);
             border: 0.5px solid var(--border-color);
             border-radius: 12px;
-            padding: 20px;
+            padding: 16px;
+            min-width: 0;
+            overflow: hidden;
         }
 
         .analytics-card-header {
@@ -685,30 +695,35 @@
             </div>
 
             <div id="addView" class="view-content active">
-                <div class="card summary">
-                    <div class="summary-item green">
-                        <div class="summary-label">Today's Expenses</div>
-                        <div class="summary-amount">₹<span id="todayTotal">0</span></div>
+                <!-- Clean Apple-style stats -->
+                <div class="card" style="padding: 24px;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                        <div>
+                            <div style="font-size: 11px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 4px;">Today</div>
+                            <div style="font-size: 34px; font-weight: 700; color: var(--text-primary); letter-spacing: -0.6px;">₹<span id="todayTotal">0</span></div>
+                        </div>
+                        <div>
+                            <div style="font-size: 11px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 4px;">This Month</div>
+                            <div style="font-size: 34px; font-weight: 700; color: var(--text-primary); letter-spacing: -0.6px;">₹<span id="monthTotal">0</span></div>
+                        </div>
                     </div>
-                    <div class="summary-item">
-                        <div class="summary-label">This Month Expense</div>
-                        <div class="summary-amount">₹<span id="monthTotal">0</span></div>
-                    </div>
-                </div>
-
-                <div class="card summary">
-                    <div class="summary-item" style="background: #28a745; color: white;">
-                        <div class="summary-label">Monthly Income</div>
-                        <div class="summary-amount">₹<span id="monthIncome">0</span></div>
-                    </div>
-                    <div class="summary-item" style="background: #17a2b8; color: white;">
-                        <div class="summary-label">Balance</div>
-                        <div class="summary-amount">₹<span id="balance">0</span></div>
+                    
+                    <div style="height: 0.5px; background: var(--border-color); margin: 20px 0;"></div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                        <div>
+                            <div style="font-size: 11px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 4px;">Income</div>
+                            <div style="font-size: 28px; font-weight: 700; letter-spacing: -0.5px;" id="monthIncomeColor">₹<span id="monthIncome">0</span></div>
+                        </div>
+                        <div>
+                            <div style="font-size: 11px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 4px;">Balance</div>
+                            <div style="font-size: 28px; font-weight: 700; letter-spacing: -0.5px;" id="balanceColor">₹<span id="balance">0</span></div>
+                        </div>
                     </div>
                 </div>
 
                 <div class="card">
-                    <h2 style="margin-bottom: 20px; color: #000;">Add New Expense</h2>
+                    <h2 style="margin-bottom: 20px;">Add Expense</h2>
                     
                     <div class="form-group">
                         <label for="amount">Amount (₹)</label>
@@ -1266,6 +1281,24 @@
             const monthIncome = parseFloat(document.getElementById('monthIncome').textContent);
             const balance = monthIncome - monthTotal;
             document.getElementById('balance').textContent = balance.toFixed(2);
+            
+            // Color balance based on positive/negative
+            const balanceEl = document.getElementById('balanceColor');
+            const incomeEl = document.getElementById('monthIncomeColor');
+            const greenColor = document.documentElement.getAttribute('data-theme') === 'dark' ? '#30d158' : '#34c759';
+            const redColor = document.documentElement.getAttribute('data-theme') === 'dark' ? '#ff453a' : '#ff3b30';
+            
+            if (balance >= 0) {
+                balanceEl.style.color = greenColor;
+            } else {
+                balanceEl.style.color = redColor;
+            }
+            
+            if (monthIncome > 0) {
+                incomeEl.style.color = greenColor;
+            } else {
+                incomeEl.style.color = 'var(--text-secondary)';
+            }
         }
 
         window.deleteExpense = async function(expenseId) {
