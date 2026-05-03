@@ -74,14 +74,14 @@
             max-width: 500px;
             width: 100%;
             margin: 0 auto;
-            padding: 12px;
+            padding: 16px;
             padding-bottom: 30px;
             overflow-x: hidden;
         }
 
         @media (max-width: 400px) {
             .container {
-                padding: 10px;
+                padding: 12px;
             }
         }
 
@@ -168,7 +168,7 @@
         input, select {
             width: 100%;
             max-width: 100%;
-            padding: 14px 16px;
+            padding: 16px;
             border: 1px solid var(--border-color);
             border-radius: 12px;
             font-size: 16px;
@@ -176,7 +176,7 @@
             background: var(--bg-card);
             color: var(--text-primary);
             letter-spacing: -0.2px;
-            transition: border-color 0.2s ease;
+            transition: all 0.2s ease;
             font-weight: 400;
         }
 
@@ -187,7 +187,8 @@
 
         input:focus, select:focus {
             outline: none;
-            border-color: var(--text-secondary);
+            border-color: #3a3a3a;
+            background: var(--bg-secondary);
         }
 
         input::placeholder {
@@ -197,40 +198,42 @@
 
         .btn {
             width: 100%;
-            padding: 16px;
-            background: var(--text-primary);
-            color: var(--bg-primary);
+            padding: 18px;
+            background: #3a3a3a;
+            color: #ffffff;
             border: none;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 500;
+            border-radius: 14px;
+            font-size: 17px;
+            font-weight: 600;
             cursor: pointer;
             font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-            letter-spacing: -0.2px;
+            letter-spacing: -0.3px;
             margin-top: 10px;
-            transition: opacity 0.2s ease;
+            transition: all 0.2s ease;
         }
 
         .btn:hover {
-            opacity: 0.85;
+            background: #2a2a2a;
+            transform: scale(0.99);
         }
 
         .btn:active {
-            opacity: 0.7;
+            transform: scale(0.97);
         }
 
         .btn-secondary {
             background: var(--bg-secondary);
             color: var(--text-primary);
             border: 1px solid var(--border-color);
-            padding: 14px;
-            border-radius: 12px;
-            font-size: 15px;
-            font-weight: 500;
+            padding: 16px;
+            border-radius: 14px;
+            font-size: 16px;
+            font-weight: 600;
         }
 
         .btn-secondary:hover {
             background: var(--bg-primary);
+            border-color: #3a3a3a;
         }
             background: var(--bg-secondary);
         }
@@ -262,9 +265,9 @@
         .card {
             background: var(--bg-card);
             border: none;
-            border-radius: 16px;
+            border-radius: 20px;
             padding: 24px;
-            margin-bottom: 16px;
+            margin-bottom: 20px;
         }
 
         .card h2 {
@@ -517,12 +520,32 @@
         }
 
         .analytics-card {
-            background: var(--bg-card);
+            background: var(--accent-sage);
             border: none;
             border-radius: 16px;
             padding: 20px;
             min-width: 0;
             overflow: hidden;
+        }
+
+        .analytics-card:nth-child(2n) {
+            background: var(--accent-blue);
+        }
+
+        .analytics-card:nth-child(3n) {
+            background: var(--accent-coral);
+        }
+
+        .analytics-card:nth-child(4n) {
+            background: var(--accent-yellow);
+        }
+
+        .analytics-card:nth-child(5n) {
+            background: var(--accent-purple);
+        }
+
+        .analytics-card:nth-child(6n) {
+            background: var(--accent-peach);
         }
 
         .analytics-card-header {
@@ -535,30 +558,33 @@
         .analytics-card-category {
             font-size: 13px;
             font-weight: 500;
-            color: var(--text-secondary);
+            color: #3a3a3a;
             letter-spacing: 0px;
             text-transform: capitalize;
+            opacity: 0.8;
         }
 
         .analytics-card-amount {
             font-size: 28px;
-            font-weight: 400;
-            color: var(--text-primary);
+            font-weight: 500;
+            color: #3a3a3a;
             margin-bottom: 8px;
             letter-spacing: -0.5px;
         }
 
         .analytics-card-period {
-            font-size: 12px;
-            color: var(--text-secondary);
+            font-size: 11px;
+            color: #3a3a3a;
             font-weight: 400;
+            opacity: 0.7;
         }
 
         .analytics-card-percent {
-            font-size: 12px;
-            color: var(--text-secondary);
+            font-size: 11px;
+            color: #3a3a3a;
             margin-top: 6px;
             font-weight: 400;
+            opacity: 0.7;
         }
 
         .expense-item {
@@ -684,16 +710,16 @@
             </div>
 
             <div class="header">
-                <h1>💰 Expense Tracker</h1>
-                <p>Track your daily spending</p>
+                <h1 style="font-size: 28px; font-weight: 600; letter-spacing: -0.5px;">Expense Tracker</h1>
+                <p style="color: var(--text-secondary); font-size: 15px; font-weight: 400;">Track your daily spending</p>
             </div>
 
             <div id="syncStatus" class="sync-status">Ready</div>
             <div class="date-display" id="dateDisplay"></div>
 
             <div class="navigation">
-                <label for="viewSelector" style="font-weight: 600; margin-bottom: 8px; display: block; color: var(--text-secondary); font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;">Navigate</label>
-                <select id="viewSelector" onchange="switchTab(this.value)" style="width: 100%; padding: 14px 12px; font-size: 17px; font-weight: 500; border-radius: 10px; border: 0.5px solid var(--border-color); background: var(--bg-card); color: var(--text-primary);">
+                <label for="viewSelector" style="font-weight: 500; margin-bottom: 8px; display: block; color: var(--text-secondary); font-size: 12px; text-transform: uppercase; letter-spacing: 0.8px;">Navigate</label>
+                <select id="viewSelector" onchange="switchTab(this.value)" style="width: 100%; padding: 16px 14px; font-size: 16px; font-weight: 500; border-radius: 12px; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-primary);">
                     <option value="add">Add Expense</option>
                     <option value="list">Expenses</option>
                     <option value="analytics">Analytics</option>
