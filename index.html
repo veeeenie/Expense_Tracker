@@ -16,27 +16,33 @@
     
     <style>
         :root {
-            --bg-primary: #fafafa;
+            --bg-primary: #fafaf8;
             --bg-secondary: #ffffff;
             --bg-card: #ffffff;
-            --text-primary: #2a2a2a;
+            --text-primary: #3a3a3a;
             --text-secondary: #8a8a8a;
             --border-color: #e8e8e8;
-            --accent-green: #4a9b7f;
-            --accent-red: #c45a5a;
-            --accent-blue: #5a8fc4;
+            --accent-sage: #a8c5b0;
+            --accent-coral: #e8b4b4;
+            --accent-blue: #b4d4e8;
+            --accent-yellow: #f5e6b8;
+            --accent-purple: #d4c5e8;
+            --accent-peach: #f5d4b8;
         }
 
         [data-theme="dark"] {
-            --bg-primary: #1a1a1a;
-            --bg-secondary: #222222;
-            --bg-card: #252525;
-            --text-primary: #e5e5e5;
-            --text-secondary: #888888;
-            --border-color: #333333;
-            --accent-green: #6bb896;
-            --accent-red: #d97777;
-            --accent-blue: #7ba3d4;
+            --bg-primary: #2a2a2a;
+            --bg-secondary: #333333;
+            --bg-card: #383838;
+            --text-primary: #f0f0f0;
+            --text-secondary: #999999;
+            --border-color: #4a4a4a;
+            --accent-sage: #6b8f76;
+            --accent-coral: #c47f7f;
+            --accent-blue: #7fa8c4;
+            --accent-yellow: #c4b27f;
+            --accent-purple: #9f7fc4;
+            --accent-peach: #c49f7f;
         }
 
         * {
@@ -696,30 +702,26 @@
             </div>
 
             <div id="addView" class="view-content active">
-                <!-- Clean Apple-style stats -->
-                <div class="card" style="padding: 24px;">
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                        <div>
-                            <div style="font-size: 11px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 4px;">Today</div>
-                            <div style="font-size: 34px; font-weight: 700; color: var(--text-primary); letter-spacing: -0.6px;">₹<span id="todayTotal">0</span></div>
-                        </div>
-                        <div>
-                            <div style="font-size: 11px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 4px;">This Month</div>
-                            <div style="font-size: 34px; font-weight: 700; color: var(--text-primary); letter-spacing: -0.6px;">₹<span id="monthTotal">0</span></div>
-                        </div>
+                <!-- Clean stats with pastel cards -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px;">
+                    <div style="background: var(--accent-sage); border-radius: 16px; padding: 20px;">
+                        <div style="font-size: 12px; color: #3a3a3a; margin-bottom: 6px; opacity: 0.7;">Today</div>
+                        <div style="font-size: 28px; font-weight: 500; color: #3a3a3a; letter-spacing: -0.5px;">₹<span id="todayTotal">0</span></div>
                     </div>
-                    
-                    <div style="height: 0.5px; background: var(--border-color); margin: 20px 0;"></div>
-                    
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                        <div>
-                            <div style="font-size: 11px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 4px;">Income</div>
-                            <div style="font-size: 28px; font-weight: 700; letter-spacing: -0.5px;" id="monthIncomeColor">₹<span id="monthIncome">0</span></div>
-                        </div>
-                        <div>
-                            <div style="font-size: 11px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 4px;">Balance</div>
-                            <div style="font-size: 28px; font-weight: 700; letter-spacing: -0.5px;" id="balanceColor">₹<span id="balance">0</span></div>
-                        </div>
+                    <div style="background: var(--accent-blue); border-radius: 16px; padding: 20px;">
+                        <div style="font-size: 12px; color: #3a3a3a; margin-bottom: 6px; opacity: 0.7;">This Month</div>
+                        <div style="font-size: 28px; font-weight: 500; color: #3a3a3a; letter-spacing: -0.5px;">₹<span id="monthTotal">0</span></div>
+                    </div>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px;">
+                    <div style="background: var(--accent-yellow); border-radius: 16px; padding: 20px;">
+                        <div style="font-size: 12px; color: #3a3a3a; margin-bottom: 6px; opacity: 0.7;">Income</div>
+                        <div style="font-size: 28px; font-weight: 500; letter-spacing: -0.5px;" id="monthIncomeColor">₹<span id="monthIncome">0</span></div>
+                    </div>
+                    <div style="background: var(--accent-coral); border-radius: 16px; padding: 20px;">
+                        <div style="font-size: 12px; color: #3a3a3a; margin-bottom: 6px; opacity: 0.7;">Balance</div>
+                        <div style="font-size: 28px; font-weight: 500; letter-spacing: -0.5px;" id="balanceColor">₹<span id="balance">0</span></div>
                     </div>
                 </div>
 
@@ -1294,20 +1296,16 @@
             // Color balance based on positive/negative
             const balanceEl = document.getElementById('balanceColor');
             const incomeEl = document.getElementById('monthIncomeColor');
-            const greenColor = document.documentElement.getAttribute('data-theme') === 'dark' ? '#6bb896' : '#4a9b7f';
-            const redColor = document.documentElement.getAttribute('data-theme') === 'dark' ? '#d97777' : '#c45a5a';
+            const positiveColor = '#3a3a3a'; // Dark for all numbers
+            const negativeColor = '#c47f7f'; // Coral for negative
             
             if (balance >= 0) {
-                balanceEl.style.color = greenColor;
+                balanceEl.style.color = positiveColor;
             } else {
-                balanceEl.style.color = redColor;
+                balanceEl.style.color = negativeColor;
             }
             
-            if (monthIncome > 0) {
-                incomeEl.style.color = greenColor;
-            } else {
-                incomeEl.style.color = 'var(--text-secondary)';
-            }
+            incomeEl.style.color = positiveColor;
         }
 
         window.deleteExpense = async function(expenseId) {
@@ -1563,34 +1561,34 @@
             const incomePercent = (income / maxValue) * 100;
             const expensesPercent = (expenses / maxValue) * 100;
             
-            const greenColor = document.documentElement.getAttribute('data-theme') === 'dark' ? '#6bb896' : '#4a9b7f';
-            const redColor = document.documentElement.getAttribute('data-theme') === 'dark' ? '#d97777' : '#c45a5a';
+            const sageColor = '#a8c5b0';
+            const coralColor = '#e8b4b4';
             
             chart.innerHTML = `
                 <div style="margin-bottom: 24px;">
                     <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
                         <span style="font-weight: 500; color: var(--text-secondary); font-size: 13px;">Income</span>
-                        <span style="font-weight: 400; color: ${greenColor}; font-size: 20px; letter-spacing: -0.3px;">₹${formatAmount(income)}</span>
+                        <span style="font-weight: 500; color: #3a3a3a; font-size: 20px; letter-spacing: -0.3px;">₹${formatAmount(income)}</span>
                     </div>
-                    <div style="background: var(--bg-secondary); height: 6px; border-radius: 3px; overflow: hidden;">
-                        <div style="background: ${greenColor}; height: 100%; width: ${incomePercent}%; border-radius: 3px;"></div>
+                    <div style="background: #f5f5f5; height: 8px; border-radius: 4px; overflow: hidden;">
+                        <div style="background: ${sageColor}; height: 100%; width: ${incomePercent}%; border-radius: 4px;"></div>
                     </div>
                 </div>
                 
                 <div style="margin-bottom: 24px;">
                     <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
                         <span style="font-weight: 500; color: var(--text-secondary); font-size: 13px;">Expenses</span>
-                        <span style="font-weight: 400; color: ${redColor}; font-size: 20px; letter-spacing: -0.3px;">₹${formatAmount(expenses)}</span>
+                        <span style="font-weight: 500; color: #3a3a3a; font-size: 20px; letter-spacing: -0.3px;">₹${formatAmount(expenses)}</span>
                     </div>
-                    <div style="background: var(--bg-secondary); height: 6px; border-radius: 3px; overflow: hidden;">
-                        <div style="background: ${redColor}; height: 100%; width: ${expensesPercent}%; border-radius: 3px;"></div>
+                    <div style="background: #f5f5f5; height: 8px; border-radius: 4px; overflow: hidden;">
+                        <div style="background: ${coralColor}; height: 100%; width: ${expensesPercent}%; border-radius: 4px;"></div>
                     </div>
                 </div>
                 
                 <div style="padding: 20px; background: var(--bg-card); border-radius: 12px; border: 1px solid var(--border-color);">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                         <span style="font-weight: 500; color: var(--text-secondary); font-size: 13px;">Balance</span>
-                        <span style="font-weight: 400; font-size: 24px; color: ${balance >= 0 ? greenColor : redColor}; letter-spacing: -0.5px;">
+                        <span style="font-weight: 500; font-size: 24px; color: ${balance >= 0 ? '#3a3a3a' : coralColor}; letter-spacing: -0.5px;">
                             ₹${formatAmount(balance)}
                         </span>
                     </div>
@@ -1629,16 +1627,16 @@
                 const weekLabel = weekDate.toLocaleDateString('en-IN', { month: 'short', day: 'numeric' });
                 const percent = (amount / maxAmount) * 100;
                 
-                const blueColor = document.documentElement.getAttribute('data-theme') === 'dark' ? '#7ba3d4' : '#5a8fc4';
+                const blueColor = '#b4d4e8';
                 
                 html += `
                     <div style="margin-bottom: 20px;">
                         <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
                             <span style="font-weight: 500; color: var(--text-secondary); font-size: 13px;">Week of ${weekLabel}</span>
-                            <span style="font-weight: 400; color: var(--text-primary); font-size: 20px; letter-spacing: -0.3px;">₹${formatAmount(amount)}</span>
+                            <span style="font-weight: 500; color: #3a3a3a; font-size: 20px; letter-spacing: -0.3px;">₹${formatAmount(amount)}</span>
                         </div>
-                        <div style="background: var(--bg-secondary); height: 6px; border-radius: 3px; overflow: hidden;">
-                            <div style="background: ${blueColor}; height: 100%; width: ${percent}%; border-radius: 3px;"></div>
+                        <div style="background: #f5f5f5; height: 8px; border-radius: 4px; overflow: hidden;">
+                            <div style="background: ${blueColor}; height: 100%; width: ${percent}%; border-radius: 4px;"></div>
                         </div>
                     </div>
                 `;
