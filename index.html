@@ -16,27 +16,29 @@
     
     <style>
         :root {
-            --bg-primary: #ffffff;
-            --bg-secondary: #f5f5f5;
+            --bg-primary: #f5f5f7;
+            --bg-secondary: #ffffff;
             --bg-card: #ffffff;
-            --text-primary: #000000;
-            --text-secondary: #666666;
-            --border-color: #000000;
-            --shadow-color: #000000;
-            --accent-bg: #000000;
-            --accent-text: #ffffff;
+            --text-primary: #1d1d1f;
+            --text-secondary: #86868b;
+            --border-color: #d2d2d7;
+            --accent-blue: #007aff;
+            --accent-green: #34c759;
+            --accent-red: #ff3b30;
+            --accent-orange: #ff9500;
         }
 
         [data-theme="dark"] {
-            --bg-primary: #1a1a1a;
-            --bg-secondary: #2d2d2d;
-            --bg-card: #242424;
-            --text-primary: #ffffff;
-            --text-secondary: #b0b0b0;
-            --border-color: #444444;
-            --shadow-color: #000000;
-            --accent-bg: #ffffff;
-            --accent-text: #000000;
+            --bg-primary: #000000;
+            --bg-secondary: #1c1c1e;
+            --bg-card: #1c1c1e;
+            --text-primary: #f5f5f7;
+            --text-secondary: #86868b;
+            --border-color: #38383a;
+            --accent-blue: #0a84ff;
+            --accent-green: #30d158;
+            --accent-red: #ff453a;
+            --accent-orange: #ff9f0a;
         }
 
         * {
@@ -51,7 +53,7 @@
         }
 
         body {
-            font-family: Calibri, 'Segoe UI', Tahoma, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             background: var(--bg-primary);
             min-height: 100vh;
             color: var(--text-primary);
@@ -59,6 +61,8 @@
             overflow-x: hidden;
             width: 100%;
             position: relative;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
 
         .container {
@@ -159,13 +163,15 @@
         input, select {
             width: 100%;
             max-width: 100%;
-            padding: 12px;
-            border: 2px solid var(--border-color);
-            border-radius: 6px;
-            font-size: 16px;
-            font-family: Calibri, 'Segoe UI', Tahoma, sans-serif;
+            padding: 14px 12px;
+            border: 0.5px solid var(--border-color);
+            border-radius: 10px;
+            font-size: 17px;
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
             background: var(--bg-card);
             color: var(--text-primary);
+            letter-spacing: -0.3px;
+            transition: border-color 0.2s ease;
         }
 
         input[type="date"] {
@@ -175,23 +181,27 @@
 
         input:focus, select:focus {
             outline: none;
-            border-color: var(--border-color);
+            border-color: var(--accent-blue);
+        }
+
+        input::placeholder {
+            color: var(--text-secondary);
         }
 
         .btn {
             width: 100%;
-            padding: 16px;
-            background: var(--accent-bg);
-            color: var(--accent-text);
-            border: 2px solid var(--border-color);
-            border-radius: 6px;
+            padding: 14px;
+            background: var(--accent-blue);
+            color: #ffffff;
+            border: none;
+            border-radius: 10px;
             font-size: 17px;
             font-weight: 600;
             cursor: pointer;
-            font-family: Calibri, 'Segoe UI', Tahoma, sans-serif;
-            letter-spacing: 1px;
-            text-transform: uppercase;
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+            letter-spacing: -0.4px;
             margin-top: 10px;
+            transition: opacity 0.2s ease;
         }
 
         .btn:hover {
@@ -199,16 +209,22 @@
         }
 
         .btn:active {
-            transform: translate(2px, 2px);
+            opacity: 0.6;
         }
 
         .btn-secondary {
-            background: var(--bg-card);
-            color: var(--text-primary);
-            border: 2px solid var(--border-color);
+            background: var(--bg-secondary);
+            color: var(--accent-blue);
+            border: 0.5px solid var(--border-color);
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
         }
 
         .btn-secondary:hover {
+            opacity: 0.7;
+        }
             background: var(--bg-secondary);
         }
 
@@ -238,15 +254,18 @@
         /* Main App Styles */
         .card {
             background: var(--bg-card);
-            border: 2px solid var(--border-color);
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 15px;
+            border: 0.5px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
         }
 
         .card h2 {
             margin-bottom: 15px;
             color: var(--text-primary);
+            font-size: 22px;
+            font-weight: 600;
+            letter-spacing: -0.3px;
         }
 
         .summary {
@@ -484,40 +503,45 @@
 
         .analytics-card {
             background: var(--bg-card);
-            border: 2px solid var(--border-color);
-            border-radius: 8px;
-            padding: 15px;
+            border: 0.5px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
         }
 
         .analytics-card-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 15px;
+            margin-bottom: 16px;
         }
 
         .analytics-card-category {
-            font-size: 14px;
+            font-size: 15px;
             font-weight: 600;
-            color: var(--text-primary);
+            color: var(--text-secondary);
+            letter-spacing: -0.2px;
+            text-transform: capitalize;
         }
 
         .analytics-card-amount {
-            font-size: 24px;
-            font-weight: bold;
+            font-size: 32px;
+            font-weight: 700;
             color: var(--text-primary);
             margin-bottom: 8px;
+            letter-spacing: -0.5px;
         }
 
         .analytics-card-period {
-            font-size: 12px;
+            font-size: 13px;
             color: var(--text-secondary);
+            font-weight: 500;
         }
 
         .analytics-card-percent {
-            font-size: 12px;
+            font-size: 13px;
             color: var(--text-secondary);
             margin-top: 8px;
+            font-weight: 500;
         }
 
         .expense-item {
@@ -651,12 +675,12 @@
             <div class="date-display" id="dateDisplay"></div>
 
             <div class="navigation">
-                <label for="viewSelector" style="font-weight: 600; margin-bottom: 8px; display: block;">Navigate to:</label>
-                <select id="viewSelector" onchange="switchTab(this.value)" style="width: 100%; padding: 12px; font-size: 16px; font-weight: 600;">
-                    <option value="add">💰 Add Expense</option>
-                    <option value="list">📋 View Expenses</option>
-                    <option value="analytics">📊 Analytics</option>
-                    <option value="income">💵 Income</option>
+                <label for="viewSelector" style="font-weight: 600; margin-bottom: 8px; display: block; color: var(--text-secondary); font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;">Navigate</label>
+                <select id="viewSelector" onchange="switchTab(this.value)" style="width: 100%; padding: 14px 12px; font-size: 17px; font-weight: 500; border-radius: 10px; border: 0.5px solid var(--border-color); background: var(--bg-card); color: var(--text-primary);">
+                    <option value="add">Add Expense</option>
+                    <option value="list">Expenses</option>
+                    <option value="analytics">Analytics</option>
+                    <option value="income">Income & Settings</option>
                 </select>
             </div>
 
@@ -1497,31 +1521,34 @@
             const incomePercent = (income / maxValue) * 100;
             const expensesPercent = (expenses / maxValue) * 100;
             
+            const greenColor = document.documentElement.getAttribute('data-theme') === 'dark' ? '#30d158' : '#34c759';
+            const redColor = document.documentElement.getAttribute('data-theme') === 'dark' ? '#ff453a' : '#ff3b30';
+            
             chart.innerHTML = `
                 <div style="margin-bottom: 20px;">
                     <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                        <span style="font-weight: 600; color: var(--text-primary);">Income</span>
-                        <span style="font-weight: bold; color: #28a745;">₹${income.toFixed(2)}</span>
+                        <span style="font-weight: 600; color: var(--text-primary); font-size: 15px;">Income</span>
+                        <span style="font-weight: 700; color: ${greenColor}; font-size: 17px; letter-spacing: -0.3px;">₹${income.toFixed(2)}</span>
                     </div>
-                    <div style="background: var(--bg-secondary); height: 30px; border-radius: 4px; overflow: hidden;">
-                        <div style="background: #28a745; height: 100%; width: ${incomePercent}%;"></div>
+                    <div style="background: var(--bg-secondary); height: 8px; border-radius: 4px; overflow: hidden;">
+                        <div style="background: ${greenColor}; height: 100%; width: ${incomePercent}%; border-radius: 4px;"></div>
                     </div>
                 </div>
                 
                 <div style="margin-bottom: 20px;">
                     <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                        <span style="font-weight: 600; color: var(--text-primary);">Expenses</span>
-                        <span style="font-weight: bold; color: #dc3545;">₹${expenses.toFixed(2)}</span>
+                        <span style="font-weight: 600; color: var(--text-primary); font-size: 15px;">Expenses</span>
+                        <span style="font-weight: 700; color: ${redColor}; font-size: 17px; letter-spacing: -0.3px;">₹${expenses.toFixed(2)}</span>
                     </div>
-                    <div style="background: var(--bg-secondary); height: 30px; border-radius: 4px; overflow: hidden;">
-                        <div style="background: #dc3545; height: 100%; width: ${expensesPercent}%;"></div>
+                    <div style="background: var(--bg-secondary); height: 8px; border-radius: 4px; overflow: hidden;">
+                        <div style="background: ${redColor}; height: 100%; width: ${expensesPercent}%; border-radius: 4px;"></div>
                     </div>
                 </div>
                 
-                <div style="padding: 15px; background: var(--bg-card); border-radius: 8px; border: 2px solid ${balance >= 0 ? '#28a745' : '#dc3545'};">
+                <div style="padding: 16px; background: var(--bg-card); border-radius: 12px; border: 0.5px solid ${balance >= 0 ? greenColor : redColor};">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <span style="font-weight: 600; color: var(--text-primary);">Balance</span>
-                        <span style="font-weight: bold; font-size: 20px; color: ${balance >= 0 ? '#28a745' : '#dc3545'};">
+                        <span style="font-weight: 600; color: var(--text-primary); font-size: 15px;">Balance</span>
+                        <span style="font-weight: 700; font-size: 24px; color: ${balance >= 0 ? greenColor : redColor}; letter-spacing: -0.5px;">
                             ₹${balance.toFixed(2)}
                         </span>
                     </div>
@@ -1560,14 +1587,16 @@
                 const weekLabel = weekDate.toLocaleDateString('en-IN', { month: 'short', day: 'numeric' });
                 const percent = (amount / maxAmount) * 100;
                 
+                const blueColor = document.documentElement.getAttribute('data-theme') === 'dark' ? '#0a84ff' : '#007aff';
+                
                 html += `
-                    <div style="margin-bottom: 15px;">
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                            <span style="font-weight: 600; color: var(--text-primary);">Week of ${weekLabel}</span>
-                            <span style="font-weight: bold; color: var(--text-primary);">₹${amount.toFixed(2)}</span>
+                    <div style="margin-bottom: 16px;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                            <span style="font-weight: 600; color: var(--text-primary); font-size: 15px;">Week of ${weekLabel}</span>
+                            <span style="font-weight: 700; color: var(--text-primary); font-size: 17px; letter-spacing: -0.3px;">₹${amount.toFixed(2)}</span>
                         </div>
-                        <div style="background: var(--bg-secondary); height: 20px; border-radius: 4px; overflow: hidden;">
-                            <div style="background: #007bff; height: 100%; width: ${percent}%;"></div>
+                        <div style="background: var(--bg-secondary); height: 8px; border-radius: 4px; overflow: hidden;">
+                            <div style="background: ${blueColor}; height: 100%; width: ${percent}%; border-radius: 4px;"></div>
                         </div>
                     </div>
                 `;
