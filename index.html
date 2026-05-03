@@ -16,18 +16,34 @@
     
     <style>
         :root {
+            /* Neutrals */
             --bg-primary: #fafaf8;
-            --bg-secondary: #ffffff;
+            --bg-secondary: #f5f5f3;
             --bg-card: #ffffff;
             --text-primary: #3a3a3a;
             --text-secondary: #8a8a8a;
             --border-color: #e8e8e8;
+            
+            /* Earthy Accents */
             --accent-sage: #a8c5b0;
-            --accent-coral: #e8b4b4;
-            --accent-blue: #b4d4e8;
-            --accent-yellow: #f5e6b8;
-            --accent-purple: #d4c5e8;
-            --accent-peach: #f5d4b8;
+            --accent-terra: #d4a89f;
+            --accent-sand: #e8d5b8;
+            --accent-clay: #b8a89f;
+            
+            /* Spacing Scale */
+            --space-xs: 8px;
+            --space-sm: 12px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            
+            /* Border Radius */
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-full: 9999px;
+            
+            /* Typography */
+            --font-sans: -apple-system, BlinkMacSystemFont, 'Inter', 'SF Pro Display', system-ui, sans-serif;
         }
 
         [data-theme="dark"] {
@@ -37,12 +53,10 @@
             --text-primary: #f0f0f0;
             --text-secondary: #999999;
             --border-color: #4a4a4a;
-            --accent-sage: #6b8f76;
-            --accent-coral: #c47f7f;
-            --accent-blue: #7fa8c4;
-            --accent-yellow: #c4b27f;
-            --accent-purple: #9f7fc4;
-            --accent-peach: #c49f7f;
+            --accent-sage: #8fa599;
+            --accent-terra: #b89088;
+            --accent-sand: #c4b89f;
+            --accent-clay: #9f9088;
         }
 
         * {
@@ -57,7 +71,7 @@
         }
 
         body {
-            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            font-family: var(--font-sans);
             background: var(--bg-primary);
             min-height: 100vh;
             color: var(--text-primary);
@@ -68,6 +82,8 @@
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
             font-weight: 400;
+            font-size: 16px;
+            line-height: 1.5;
         }
 
         .container {
@@ -168,16 +184,15 @@
         input, select {
             width: 100%;
             max-width: 100%;
-            padding: 16px;
+            padding: var(--space-md);
             border: 1px solid var(--border-color);
-            border-radius: 12px;
+            border-radius: var(--radius-sm);
             font-size: 16px;
-            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            font-family: var(--font-sans);
             background: var(--bg-card);
             color: var(--text-primary);
-            letter-spacing: -0.2px;
-            transition: all 0.2s ease;
             font-weight: 400;
+            transition: all 0.2s ease;
         }
 
         input[type="date"] {
@@ -187,53 +202,59 @@
 
         input:focus, select:focus {
             outline: none;
-            border-color: #3a3a3a;
+            border-color: var(--text-primary);
             background: var(--bg-secondary);
         }
 
         input::placeholder {
             color: var(--text-secondary);
-            font-weight: 300;
+            font-weight: 400;
+        }
+
+        label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: var(--space-xs);
         }
 
         .btn {
             width: 100%;
-            padding: 18px;
-            background: #3a3a3a;
-            color: #ffffff;
+            padding: var(--space-md);
+            background: var(--text-primary);
+            color: var(--bg-primary);
             border: none;
-            border-radius: 14px;
-            font-size: 17px;
-            font-weight: 600;
+            border-radius: var(--radius-sm);
+            font-size: 16px;
+            font-weight: 500;
             cursor: pointer;
-            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-            letter-spacing: -0.3px;
-            margin-top: 10px;
+            font-family: var(--font-sans);
+            letter-spacing: -0.01em;
+            margin-top: var(--space-sm);
             transition: all 0.2s ease;
         }
 
         .btn:hover {
-            background: #2a2a2a;
-            transform: scale(0.99);
+            opacity: 0.9;
         }
 
         .btn:active {
-            transform: scale(0.97);
+            transform: scale(0.98);
         }
 
         .btn-secondary {
-            background: var(--bg-secondary);
+            background: transparent;
             color: var(--text-primary);
             border: 1px solid var(--border-color);
-            padding: 16px;
-            border-radius: 14px;
-            font-size: 16px;
-            font-weight: 600;
+            padding: var(--space-md);
+            border-radius: var(--radius-sm);
+            font-size: 15px;
+            font-weight: 500;
         }
 
         .btn-secondary:hover {
-            background: var(--bg-primary);
-            border-color: #3a3a3a;
+            background: var(--bg-secondary);
         }
             background: var(--bg-secondary);
         }
@@ -264,18 +285,18 @@
         /* Main App Styles */
         .card {
             background: var(--bg-card);
-            border: none;
-            border-radius: 20px;
-            padding: 24px;
-            margin-bottom: 20px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
+            margin-bottom: var(--space-lg);
         }
 
         .card h2 {
-            margin-bottom: 20px;
+            margin-bottom: var(--space-md);
             color: var(--text-primary);
             font-size: 20px;
-            font-weight: 500;
-            letter-spacing: -0.3px;
+            font-weight: 600;
+            letter-spacing: -0.01em;
         }
 
         .summary {
@@ -520,32 +541,28 @@
         }
 
         .analytics-card {
-            background: var(--accent-sage);
-            border: none;
-            border-radius: 16px;
-            padding: 20px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: var(--space-lg);
             min-width: 0;
             overflow: hidden;
         }
 
-        .analytics-card:nth-child(2n) {
-            background: var(--accent-blue);
+        .analytics-card:nth-child(4n+1) {
+            background: var(--accent-sage);
         }
 
-        .analytics-card:nth-child(3n) {
-            background: var(--accent-coral);
+        .analytics-card:nth-child(4n+2) {
+            background: var(--accent-terra);
         }
 
-        .analytics-card:nth-child(4n) {
-            background: var(--accent-yellow);
+        .analytics-card:nth-child(4n+3) {
+            background: var(--accent-sand);
         }
 
-        .analytics-card:nth-child(5n) {
-            background: var(--accent-purple);
-        }
-
-        .analytics-card:nth-child(6n) {
-            background: var(--accent-peach);
+        .analytics-card:nth-child(4n+4) {
+            background: var(--accent-clay);
         }
 
         .analytics-card-header {
@@ -556,35 +573,34 @@
         }
 
         .analytics-card-category {
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 500;
-            color: #3a3a3a;
-            letter-spacing: 0px;
+            color: var(--text-primary);
             text-transform: capitalize;
             opacity: 0.8;
+            margin-bottom: var(--space-xs);
         }
 
         .analytics-card-amount {
-            font-size: 28px;
-            font-weight: 500;
-            color: #3a3a3a;
-            margin-bottom: 8px;
-            letter-spacing: -0.5px;
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: var(--space-xs);
         }
 
         .analytics-card-period {
             font-size: 11px;
-            color: #3a3a3a;
+            color: var(--text-primary);
             font-weight: 400;
-            opacity: 0.7;
+            opacity: 0.6;
         }
 
         .analytics-card-percent {
             font-size: 11px;
-            color: #3a3a3a;
-            margin-top: 6px;
+            color: var(--text-primary);
+            margin-top: var(--space-xs);
             font-weight: 400;
-            opacity: 0.7;
+            opacity: 0.6;
         }
 
         .expense-item {
@@ -728,26 +744,26 @@
             </div>
 
             <div id="addView" class="view-content active">
-                <!-- Clean stats with pastel cards -->
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px;">
-                    <div style="background: var(--accent-sage); border-radius: 16px; padding: 20px;">
-                        <div style="font-size: 12px; color: #3a3a3a; margin-bottom: 6px; opacity: 0.7;">Today</div>
-                        <div style="font-size: 28px; font-weight: 500; color: #3a3a3a; letter-spacing: -0.5px;">₹<span id="todayTotal">0</span></div>
+                <!-- Unified stat cards -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-md); margin-bottom: var(--space-lg);">
+                    <div style="background: var(--accent-sage); border-radius: var(--radius-md); padding: var(--space-lg);">
+                        <div style="font-size: 12px; color: var(--text-primary); margin-bottom: var(--space-xs); opacity: 0.7; font-weight: 500;">Today</div>
+                        <div style="font-size: 24px; font-weight: 600; color: var(--text-primary);">₹<span id="todayTotal">0</span></div>
                     </div>
-                    <div style="background: var(--accent-blue); border-radius: 16px; padding: 20px;">
-                        <div style="font-size: 12px; color: #3a3a3a; margin-bottom: 6px; opacity: 0.7;">This Month</div>
-                        <div style="font-size: 28px; font-weight: 500; color: #3a3a3a; letter-spacing: -0.5px;">₹<span id="monthTotal">0</span></div>
+                    <div style="background: var(--accent-terra); border-radius: var(--radius-md); padding: var(--space-lg);">
+                        <div style="font-size: 12px; color: var(--text-primary); margin-bottom: var(--space-xs); opacity: 0.7; font-weight: 500;">This Month</div>
+                        <div style="font-size: 24px; font-weight: 600; color: var(--text-primary);">₹<span id="monthTotal">0</span></div>
                     </div>
                 </div>
                 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px;">
-                    <div style="background: var(--accent-yellow); border-radius: 16px; padding: 20px;">
-                        <div style="font-size: 12px; color: #3a3a3a; margin-bottom: 6px; opacity: 0.7;">Income</div>
-                        <div style="font-size: 28px; font-weight: 500; letter-spacing: -0.5px;" id="monthIncomeColor">₹<span id="monthIncome">0</span></div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-md); margin-bottom: var(--space-lg);">
+                    <div style="background: var(--accent-sand); border-radius: var(--radius-md); padding: var(--space-lg);">
+                        <div style="font-size: 12px; color: var(--text-primary); margin-bottom: var(--space-xs); opacity: 0.7; font-weight: 500;">Income</div>
+                        <div style="font-size: 24px; font-weight: 600;" id="monthIncomeColor">₹<span id="monthIncome">0</span></div>
                     </div>
-                    <div style="background: var(--accent-coral); border-radius: 16px; padding: 20px;">
-                        <div style="font-size: 12px; color: #3a3a3a; margin-bottom: 6px; opacity: 0.7;">Balance</div>
-                        <div style="font-size: 28px; font-weight: 500; letter-spacing: -0.5px;" id="balanceColor">₹<span id="balance">0</span></div>
+                    <div style="background: var(--accent-clay); border-radius: var(--radius-md); padding: var(--space-lg);">
+                        <div style="font-size: 12px; color: var(--text-primary); margin-bottom: var(--space-xs); opacity: 0.7; font-weight: 500;">Balance</div>
+                        <div style="font-size: 24px; font-weight: 600;" id="balanceColor">₹<span id="balance">0</span></div>
                     </div>
                 </div>
 
@@ -1587,34 +1603,31 @@
             const incomePercent = (income / maxValue) * 100;
             const expensesPercent = (expenses / maxValue) * 100;
             
-            const sageColor = '#a8c5b0';
-            const coralColor = '#e8b4b4';
-            
             chart.innerHTML = `
-                <div style="margin-bottom: 24px;">
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                        <span style="font-weight: 500; color: var(--text-secondary); font-size: 13px;">Income</span>
-                        <span style="font-weight: 500; color: #3a3a3a; font-size: 20px; letter-spacing: -0.3px;">₹${formatAmount(income)}</span>
+                <div style="margin-bottom: var(--space-lg);">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: var(--space-sm);">
+                        <span style="font-size: 14px; font-weight: 500; color: var(--text-primary);">Income</span>
+                        <span style="font-size: 16px; font-weight: 600; color: var(--text-primary);">₹${formatAmount(income)}</span>
                     </div>
-                    <div style="background: #f5f5f5; height: 8px; border-radius: 4px; overflow: hidden;">
-                        <div style="background: ${sageColor}; height: 100%; width: ${incomePercent}%; border-radius: 4px;"></div>
-                    </div>
-                </div>
-                
-                <div style="margin-bottom: 24px;">
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                        <span style="font-weight: 500; color: var(--text-secondary); font-size: 13px;">Expenses</span>
-                        <span style="font-weight: 500; color: #3a3a3a; font-size: 20px; letter-spacing: -0.3px;">₹${formatAmount(expenses)}</span>
-                    </div>
-                    <div style="background: #f5f5f5; height: 8px; border-radius: 4px; overflow: hidden;">
-                        <div style="background: ${coralColor}; height: 100%; width: ${expensesPercent}%; border-radius: 4px;"></div>
+                    <div style="background: var(--bg-secondary); height: 12px; border-radius: var(--radius-full); overflow: hidden;">
+                        <div style="background: var(--accent-sage); height: 100%; width: ${incomePercent}%; border-radius: var(--radius-full); transition: width 0.3s ease;"></div>
                     </div>
                 </div>
                 
-                <div style="padding: 20px; background: var(--bg-card); border-radius: 12px; border: 1px solid var(--border-color);">
+                <div style="margin-bottom: var(--space-lg);">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: var(--space-sm);">
+                        <span style="font-size: 14px; font-weight: 500; color: var(--text-primary);">Expenses</span>
+                        <span style="font-size: 16px; font-weight: 600; color: var(--text-primary);">₹${formatAmount(expenses)}</span>
+                    </div>
+                    <div style="background: var(--bg-secondary); height: 12px; border-radius: var(--radius-full); overflow: hidden;">
+                        <div style="background: var(--accent-terra); height: 100%; width: ${expensesPercent}%; border-radius: var(--radius-full); transition: width 0.3s ease;"></div>
+                    </div>
+                </div>
+                
+                <div style="padding: var(--space-lg); background: var(--bg-card); border-radius: var(--radius-md); border: 1px solid var(--border-color);">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <span style="font-weight: 500; color: var(--text-secondary); font-size: 13px;">Balance</span>
-                        <span style="font-weight: 500; font-size: 24px; color: ${balance >= 0 ? '#3a3a3a' : coralColor}; letter-spacing: -0.5px;">
+                        <span style="font-size: 14px; font-weight: 500; color: var(--text-primary);">Balance</span>
+                        <span style="font-size: 20px; font-weight: 600; color: ${balance >= 0 ? 'var(--accent-sage)' : 'var(--accent-terra)'};">
                             ₹${formatAmount(balance)}
                         </span>
                     </div>
@@ -1653,16 +1666,14 @@
                 const weekLabel = weekDate.toLocaleDateString('en-IN', { month: 'short', day: 'numeric' });
                 const percent = (amount / maxAmount) * 100;
                 
-                const blueColor = '#b4d4e8';
-                
                 html += `
-                    <div style="margin-bottom: 20px;">
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                            <span style="font-weight: 500; color: var(--text-secondary); font-size: 13px;">Week of ${weekLabel}</span>
-                            <span style="font-weight: 500; color: #3a3a3a; font-size: 20px; letter-spacing: -0.3px;">₹${formatAmount(amount)}</span>
+                    <div style="margin-bottom: var(--space-lg);">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: var(--space-sm);">
+                            <span style="font-size: 14px; font-weight: 500; color: var(--text-primary);">Week of ${weekLabel}</span>
+                            <span style="font-size: 16px; font-weight: 600; color: var(--text-primary);">₹${formatAmount(amount)}</span>
                         </div>
-                        <div style="background: #f5f5f5; height: 8px; border-radius: 4px; overflow: hidden;">
-                            <div style="background: ${blueColor}; height: 100%; width: ${percent}%; border-radius: 4px;"></div>
+                        <div style="background: var(--bg-secondary); height: 12px; border-radius: var(--radius-full); overflow: hidden;">
+                            <div style="background: var(--accent-clay); height: 100%; width: ${percent}%; border-radius: var(--radius-full); transition: width 0.3s ease;"></div>
                         </div>
                     </div>
                 `;
