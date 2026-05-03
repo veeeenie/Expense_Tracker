@@ -16,29 +16,27 @@
     
     <style>
         :root {
-            --bg-primary: #f5f5f7;
+            --bg-primary: #fafafa;
             --bg-secondary: #ffffff;
             --bg-card: #ffffff;
-            --text-primary: #1d1d1f;
-            --text-secondary: #86868b;
-            --border-color: #d2d2d7;
-            --accent-blue: #007aff;
-            --accent-green: #34c759;
-            --accent-red: #ff3b30;
-            --accent-orange: #ff9500;
+            --text-primary: #2a2a2a;
+            --text-secondary: #8a8a8a;
+            --border-color: #e8e8e8;
+            --accent-green: #4a9b7f;
+            --accent-red: #c45a5a;
+            --accent-blue: #5a8fc4;
         }
 
         [data-theme="dark"] {
-            --bg-primary: #000000;
-            --bg-secondary: #1c1c1e;
-            --bg-card: #1c1c1e;
-            --text-primary: #f5f5f7;
-            --text-secondary: #86868b;
-            --border-color: #38383a;
-            --accent-blue: #0a84ff;
-            --accent-green: #30d158;
-            --accent-red: #ff453a;
-            --accent-orange: #ff9f0a;
+            --bg-primary: #1a1a1a;
+            --bg-secondary: #222222;
+            --bg-card: #252525;
+            --text-primary: #e5e5e5;
+            --text-secondary: #888888;
+            --border-color: #333333;
+            --accent-green: #6bb896;
+            --accent-red: #d97777;
+            --accent-blue: #7ba3d4;
         }
 
         * {
@@ -53,7 +51,7 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
             background: var(--bg-primary);
             min-height: 100vh;
             color: var(--text-primary);
@@ -63,6 +61,7 @@
             position: relative;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
+            font-weight: 400;
         }
 
         .container {
@@ -163,15 +162,16 @@
         input, select {
             width: 100%;
             max-width: 100%;
-            padding: 14px 12px;
-            border: 0.5px solid var(--border-color);
-            border-radius: 10px;
-            font-size: 17px;
-            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+            padding: 14px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            font-size: 16px;
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
             background: var(--bg-card);
             color: var(--text-primary);
-            letter-spacing: -0.3px;
+            letter-spacing: -0.2px;
             transition: border-color 0.2s ease;
+            font-weight: 400;
         }
 
         input[type="date"] {
@@ -181,49 +181,50 @@
 
         input:focus, select:focus {
             outline: none;
-            border-color: var(--accent-blue);
+            border-color: var(--text-secondary);
         }
 
         input::placeholder {
             color: var(--text-secondary);
+            font-weight: 300;
         }
 
         .btn {
             width: 100%;
-            padding: 14px;
-            background: var(--accent-blue);
-            color: #ffffff;
+            padding: 16px;
+            background: var(--text-primary);
+            color: var(--bg-primary);
             border: none;
-            border-radius: 10px;
-            font-size: 17px;
-            font-weight: 600;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 500;
             cursor: pointer;
-            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
-            letter-spacing: -0.4px;
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            letter-spacing: -0.2px;
             margin-top: 10px;
             transition: opacity 0.2s ease;
         }
 
         .btn:hover {
-            opacity: 0.8;
+            opacity: 0.85;
         }
 
         .btn:active {
-            opacity: 0.6;
+            opacity: 0.7;
         }
 
         .btn-secondary {
             background: var(--bg-secondary);
-            color: var(--accent-blue);
-            border: 0.5px solid var(--border-color);
-            padding: 12px;
-            border-radius: 10px;
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            padding: 14px;
+            border-radius: 12px;
             font-size: 15px;
-            font-weight: 600;
+            font-weight: 500;
         }
 
         .btn-secondary:hover {
-            opacity: 0.7;
+            background: var(--bg-primary);
         }
             background: var(--bg-secondary);
         }
@@ -254,17 +255,17 @@
         /* Main App Styles */
         .card {
             background: var(--bg-card);
-            border: 0.5px solid var(--border-color);
-            border-radius: 12px;
-            padding: 20px;
+            border: none;
+            border-radius: 16px;
+            padding: 24px;
             margin-bottom: 16px;
         }
 
         .card h2 {
-            margin-bottom: 15px;
+            margin-bottom: 20px;
             color: var(--text-primary);
-            font-size: 22px;
-            font-weight: 600;
+            font-size: 20px;
+            font-weight: 500;
             letter-spacing: -0.3px;
         }
 
@@ -511,9 +512,9 @@
 
         .analytics-card {
             background: var(--bg-card);
-            border: 0.5px solid var(--border-color);
-            border-radius: 12px;
-            padding: 16px;
+            border: none;
+            border-radius: 16px;
+            padding: 20px;
             min-width: 0;
             overflow: hidden;
         }
@@ -526,32 +527,32 @@
         }
 
         .analytics-card-category {
-            font-size: 15px;
-            font-weight: 600;
+            font-size: 13px;
+            font-weight: 500;
             color: var(--text-secondary);
-            letter-spacing: -0.2px;
+            letter-spacing: 0px;
             text-transform: capitalize;
         }
 
         .analytics-card-amount {
-            font-size: 32px;
-            font-weight: 700;
+            font-size: 28px;
+            font-weight: 400;
             color: var(--text-primary);
             margin-bottom: 8px;
             letter-spacing: -0.5px;
         }
 
         .analytics-card-period {
-            font-size: 13px;
+            font-size: 12px;
             color: var(--text-secondary);
-            font-weight: 500;
+            font-weight: 400;
         }
 
         .analytics-card-percent {
-            font-size: 13px;
+            font-size: 12px;
             color: var(--text-secondary);
-            margin-top: 8px;
-            font-weight: 500;
+            margin-top: 6px;
+            font-weight: 400;
         }
 
         .expense-item {
@@ -995,6 +996,14 @@
 
         let currentUser = null;
 
+        // Number formatting - no decimals unless needed
+        function formatAmount(amount) {
+            if (amount % 1 === 0) {
+                return amount.toString(); // No decimals for whole numbers
+            }
+            return amount.toFixed(2); // Show decimals only if needed
+        }
+
         // Auth state observer
         onAuthStateChanged(auth, (user) => {
             document.getElementById('loadingScreen').style.display = 'none';
@@ -1274,19 +1283,19 @@
                 }
             });
             
-            document.getElementById('todayTotal').textContent = todayTotal.toFixed(2);
-            document.getElementById('monthTotal').textContent = monthTotal.toFixed(2);
+            document.getElementById('todayTotal').textContent = formatAmount(todayTotal);
+            document.getElementById('monthTotal').textContent = formatAmount(monthTotal);
             
             // Update balance
-            const monthIncome = parseFloat(document.getElementById('monthIncome').textContent);
+            const monthIncome = parseFloat(document.getElementById('monthIncome').textContent || 0);
             const balance = monthIncome - monthTotal;
-            document.getElementById('balance').textContent = balance.toFixed(2);
+            document.getElementById('balance').textContent = formatAmount(balance);
             
             // Color balance based on positive/negative
             const balanceEl = document.getElementById('balanceColor');
             const incomeEl = document.getElementById('monthIncomeColor');
-            const greenColor = document.documentElement.getAttribute('data-theme') === 'dark' ? '#30d158' : '#34c759';
-            const redColor = document.documentElement.getAttribute('data-theme') === 'dark' ? '#ff453a' : '#ff3b30';
+            const greenColor = document.documentElement.getAttribute('data-theme') === 'dark' ? '#6bb896' : '#4a9b7f';
+            const redColor = document.documentElement.getAttribute('data-theme') === 'dark' ? '#d97777' : '#c45a5a';
             
             if (balance >= 0) {
                 balanceEl.style.color = greenColor;
@@ -1536,7 +1545,7 @@
                         <div class="analytics-card-header">
                             <div class="analytics-card-category">${category}</div>
                         </div>
-                        <div class="analytics-card-amount">₹${amount.toFixed(2)}</div>
+                        <div class="analytics-card-amount">₹${formatAmount(amount)}</div>
                         <div class="analytics-card-period">Monthly</div>
                         <div class="analytics-card-percent">${percent}% of total</div>
                     </div>
@@ -1554,35 +1563,35 @@
             const incomePercent = (income / maxValue) * 100;
             const expensesPercent = (expenses / maxValue) * 100;
             
-            const greenColor = document.documentElement.getAttribute('data-theme') === 'dark' ? '#30d158' : '#34c759';
-            const redColor = document.documentElement.getAttribute('data-theme') === 'dark' ? '#ff453a' : '#ff3b30';
+            const greenColor = document.documentElement.getAttribute('data-theme') === 'dark' ? '#6bb896' : '#4a9b7f';
+            const redColor = document.documentElement.getAttribute('data-theme') === 'dark' ? '#d97777' : '#c45a5a';
             
             chart.innerHTML = `
-                <div style="margin-bottom: 20px;">
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                        <span style="font-weight: 600; color: var(--text-primary); font-size: 15px;">Income</span>
-                        <span style="font-weight: 700; color: ${greenColor}; font-size: 17px; letter-spacing: -0.3px;">₹${income.toFixed(2)}</span>
+                <div style="margin-bottom: 24px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                        <span style="font-weight: 500; color: var(--text-secondary); font-size: 13px;">Income</span>
+                        <span style="font-weight: 400; color: ${greenColor}; font-size: 20px; letter-spacing: -0.3px;">₹${formatAmount(income)}</span>
                     </div>
-                    <div style="background: var(--bg-secondary); height: 8px; border-radius: 4px; overflow: hidden;">
-                        <div style="background: ${greenColor}; height: 100%; width: ${incomePercent}%; border-radius: 4px;"></div>
-                    </div>
-                </div>
-                
-                <div style="margin-bottom: 20px;">
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                        <span style="font-weight: 600; color: var(--text-primary); font-size: 15px;">Expenses</span>
-                        <span style="font-weight: 700; color: ${redColor}; font-size: 17px; letter-spacing: -0.3px;">₹${expenses.toFixed(2)}</span>
-                    </div>
-                    <div style="background: var(--bg-secondary); height: 8px; border-radius: 4px; overflow: hidden;">
-                        <div style="background: ${redColor}; height: 100%; width: ${expensesPercent}%; border-radius: 4px;"></div>
+                    <div style="background: var(--bg-secondary); height: 6px; border-radius: 3px; overflow: hidden;">
+                        <div style="background: ${greenColor}; height: 100%; width: ${incomePercent}%; border-radius: 3px;"></div>
                     </div>
                 </div>
                 
-                <div style="padding: 16px; background: var(--bg-card); border-radius: 12px; border: 0.5px solid ${balance >= 0 ? greenColor : redColor};">
+                <div style="margin-bottom: 24px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                        <span style="font-weight: 500; color: var(--text-secondary); font-size: 13px;">Expenses</span>
+                        <span style="font-weight: 400; color: ${redColor}; font-size: 20px; letter-spacing: -0.3px;">₹${formatAmount(expenses)}</span>
+                    </div>
+                    <div style="background: var(--bg-secondary); height: 6px; border-radius: 3px; overflow: hidden;">
+                        <div style="background: ${redColor}; height: 100%; width: ${expensesPercent}%; border-radius: 3px;"></div>
+                    </div>
+                </div>
+                
+                <div style="padding: 20px; background: var(--bg-card); border-radius: 12px; border: 1px solid var(--border-color);">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <span style="font-weight: 600; color: var(--text-primary); font-size: 15px;">Balance</span>
-                        <span style="font-weight: 700; font-size: 24px; color: ${balance >= 0 ? greenColor : redColor}; letter-spacing: -0.5px;">
-                            ₹${balance.toFixed(2)}
+                        <span style="font-weight: 500; color: var(--text-secondary); font-size: 13px;">Balance</span>
+                        <span style="font-weight: 400; font-size: 24px; color: ${balance >= 0 ? greenColor : redColor}; letter-spacing: -0.5px;">
+                            ₹${formatAmount(balance)}
                         </span>
                     </div>
                 </div>
@@ -1620,16 +1629,16 @@
                 const weekLabel = weekDate.toLocaleDateString('en-IN', { month: 'short', day: 'numeric' });
                 const percent = (amount / maxAmount) * 100;
                 
-                const blueColor = document.documentElement.getAttribute('data-theme') === 'dark' ? '#0a84ff' : '#007aff';
+                const blueColor = document.documentElement.getAttribute('data-theme') === 'dark' ? '#7ba3d4' : '#5a8fc4';
                 
                 html += `
-                    <div style="margin-bottom: 16px;">
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                            <span style="font-weight: 600; color: var(--text-primary); font-size: 15px;">Week of ${weekLabel}</span>
-                            <span style="font-weight: 700; color: var(--text-primary); font-size: 17px; letter-spacing: -0.3px;">₹${amount.toFixed(2)}</span>
+                    <div style="margin-bottom: 20px;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                            <span style="font-weight: 500; color: var(--text-secondary); font-size: 13px;">Week of ${weekLabel}</span>
+                            <span style="font-weight: 400; color: var(--text-primary); font-size: 20px; letter-spacing: -0.3px;">₹${formatAmount(amount)}</span>
                         </div>
-                        <div style="background: var(--bg-secondary); height: 8px; border-radius: 4px; overflow: hidden;">
-                            <div style="background: ${blueColor}; height: 100%; width: ${percent}%; border-radius: 4px;"></div>
+                        <div style="background: var(--bg-secondary); height: 6px; border-radius: 3px; overflow: hidden;">
+                            <div style="background: ${blueColor}; height: 100%; width: ${percent}%; border-radius: 3px;"></div>
                         </div>
                     </div>
                 `;
