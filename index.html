@@ -622,6 +622,8 @@
             height: 180px;
             min-height: 180px;
             margin-bottom: var(--space-lg);
+            overflow: hidden;
+            position: relative;
         }
 
         /* Empty chart state */
@@ -1767,8 +1769,11 @@
                 }
             };
             
-            // Create simple CSS bar chart with enhanced visibility
-            let html = '<div style="display: flex; align-items: flex-end; gap: 6px; height: 160px; padding: 10px 0; background: transparent;">';
+            // Create simple CSS bar chart with enhanced visibility and proper bounds
+            let html = `
+                <div style="width: 100%; overflow: hidden; padding: 0 8px;">
+                    <div style="display: flex; align-items: flex-end; gap: 6px; height: 160px; padding: 10px 0; background: transparent;">
+            `;
             
             dataArray.forEach(item => {
                 const heightPercent = (item.amount / maxAmount) * 100;
@@ -1783,7 +1788,8 @@
                         justify-content: flex-end;
                         cursor: pointer;
                         position: relative;
-                        min-width: 12px;
+                        min-width: 8px;
+                        max-width: 20px;
                         height: 100%;
                     " title="${item.displayDate}: ₹${safeFormat(item.amount)}">
                         <div style="
@@ -1799,11 +1805,14 @@
                 `;
             });
             
-            html += '</div>';
+            html += `
+                    </div>
+                </div>
+            `;
             
             // Add legend with first and last dates
             html += `
-                <div style="display: flex; justify-content: space-between; padding: 8px 4px 0 4px; font-size: 12px; color: var(--text-secondary); font-weight: 500;">
+                <div style="display: flex; justify-content: space-between; padding: 8px 12px 0 12px; font-size: 12px; color: var(--text-secondary); font-weight: 500;">
                     <span>${dataArray[0].displayDate}</span>
                     <span style="text-align: right;">${dataArray[dataArray.length - 1].displayDate}</span>
                 </div>
@@ -1818,6 +1827,12 @@
             const period = document.getElementById('analyticsMonth')?.value || 'current';
             console.log('=== ANALYTICS GENERATION ===');
             console.log('Selected period:', period);
+            
+            // Show loading state
+            const grid = document.getElementById('analyticsGrid');
+            if (grid) {
+                grid.innerHTML = '<div style="padding: 40px; text-align: center; color: var(--text-secondary);">Loading...</div>';
+            }
             
             const expensesRef = ref(database, `users/${currentUser.uid}/expenses`);
             const incomeRef = ref(database, `users/${currentUser.uid}/income`);
@@ -1867,15 +1882,20 @@
                     totalIncome += inc.amount;
                 });
                 
-                // Display all analytics
-                displayDailySpendingChart(filteredExpenses);
-                displayAnalyticsCards(categoryTotals, totalExpenses, period);
-                displaySpendingIncomeChart(totalIncome, totalExpenses);
-                displayWeeklyBreakdown(filteredExpenses);
-                
-                console.log('=== ANALYTICS COMPLETE ===');
+                // Display all analytics - force immediate update
+                requestAnimationFrame(() => {
+                    displayDailySpendingChart(filteredExpenses);
+                    displayAnalyticsCards(categoryTotals, totalExpenses, period);
+                    displaySpendingIncomeChart(totalIncome, totalExpenses);
+                    displayWeeklyBreakdown(filteredExpenses);
+                    
+                    console.log('=== ANALYTICS COMPLETE ===');
+                });
             }).catch(error => {
                 console.error('Error loading analytics:', error);
+                if (grid) {
+                    grid.innerHTML = '<div style="padding: 40px; text-align: center; color: var(--accent-terra);">Error loading data</div>';
+                }
             });
         }
 
