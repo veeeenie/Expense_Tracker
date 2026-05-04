@@ -365,11 +365,16 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 18px;
+            padding: var(--space-lg);
             background: var(--bg-card);
-            border: 2px solid var(--border-color);
-            border-radius: 6px;
-            margin-bottom: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            margin-bottom: var(--space-md);
+            transition: border-color 0.2s ease;
+        }
+
+        .expense-item:hover {
+            border-color: var(--text-secondary);
         }
 
         .expense-info {
@@ -378,7 +383,7 @@
 
         .expense-description {
             font-weight: 600;
-            margin-bottom: 6px;
+            margin-bottom: var(--space-xs);
             color: var(--text-primary);
             font-size: 16px;
         }
@@ -386,68 +391,87 @@
         .expense-meta {
             font-size: 13px;
             color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            flex-wrap: wrap;
         }
 
+        /* Pale category tags matching analytics cards */
         .expense-category {
             display: inline-block;
-            padding: 4px 10px;
-            background: var(--accent-bg);
-            color: var(--accent-text);
-            border-radius: 4px;
+            padding: 4px 12px;
+            border-radius: var(--radius-sm);
             font-size: 12px;
-            margin-right: 10px;
-            font-weight: 600;
+            font-weight: 500;
+        }
+
+        /* Category-specific pale backgrounds */
+        .expense-category[data-category="Food"],
+        .expense-category[data-category="Groceries"] {
+            background: rgba(168, 197, 176, 0.2);
+            color: #5a7d63;
+        }
+
+        .expense-category[data-category="Utilities"],
+        .expense-category[data-category="Entertainment"] {
+            background: rgba(212, 168, 159, 0.2);
+            color: #8f6b63;
+        }
+
+        .expense-category[data-category="Shopping"],
+        .expense-category[data-category="Miscellaneous"] {
+            background: rgba(232, 213, 184, 0.2);
+            color: #9d8b6b;
+        }
+
+        .expense-category[data-category="Health"],
+        .expense-category[data-category="Insurance"] {
+            background: rgba(184, 168, 159, 0.2);
+            color: #7d6b63;
         }
 
         .expense-subcategory {
-            background: #666666;
-            color: #ffffff;
+            background: rgba(138, 141, 139, 0.15);
+            color: var(--text-secondary);
+            padding: 4px 12px;
+            border-radius: var(--radius-sm);
+            font-size: 12px;
+            font-weight: 400;
         }
 
         .expense-amount {
-            font-size: 20px;
-            font-weight: bold;
+            font-size: 18px;
+            font-weight: 600;
             color: var(--text-primary);
-            margin-left: 15px;
+            margin-left: var(--space-md);
+            margin-right: var(--space-sm);
         }
 
+        /* Minimalist delete button - thin icon only */
         .delete-btn {
-            background: var(--accent-bg);
-            border: 2px solid var(--border-color);
-            color: var(--accent-text);
-            font-size: 18px;
+            background: transparent;
+            border: none;
+            color: #8A8D8B;
             cursor: pointer;
-            padding: 8px 12px;
-            margin-left: 10px;
-            border-radius: 4px;
-            font-weight: bold;
-        }
-
-        .delete-btn:hover {
-            opacity: 0.7;
-        }
-
-        .expense-amount {
+            padding: var(--space-xs);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.2s ease;
             font-size: 20px;
-            font-weight: bold;
-            color: #000000;
-            margin-left: 15px;
-        }
-
-        .delete-btn {
-            background: #000000;
-            border: 2px solid #000000;
-            color: #ffffff;
-            font-size: 18px;
-            cursor: pointer;
-            padding: 8px 12px;
-            margin-left: 10px;
-            border-radius: 4px;
-            font-weight: bold;
+            line-height: 1;
         }
 
         .delete-btn:hover {
-            background: #ffffff;
+            color: #E29578;
+        }
+
+        .delete-btn::before {
+            content: '×';
+            font-size: 24px;
+            font-weight: 300;
+        }
             color: #000000;
         }
 
@@ -575,7 +599,7 @@
         .analytics-card-category {
             font-size: 12px;
             font-weight: 500;
-            color: var(--text-primary);
+            color: #2D302F;
             text-transform: capitalize;
             opacity: 0.8;
             margin-bottom: var(--space-xs);
@@ -584,20 +608,20 @@
         .analytics-card-amount {
             font-size: 24px;
             font-weight: 600;
-            color: var(--text-primary);
+            color: #2D302F;
             margin-bottom: var(--space-xs);
         }
 
         .analytics-card-period {
             font-size: 11px;
-            color: var(--text-primary);
+            color: #2D302F;
             font-weight: 400;
             opacity: 0.6;
         }
 
         .analytics-card-percent {
             font-size: 11px;
-            color: var(--text-primary);
+            color: #2D302F;
             margin-top: var(--space-xs);
             font-weight: 400;
             opacity: 0.6;
@@ -605,11 +629,11 @@
 
         .expense-item {
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.2s ease;
         }
 
         .expense-item:hover {
-            background: #f5f5f5;
+            border-color: var(--text-secondary);
         }
 
         /* Edit Modal */
@@ -739,31 +763,32 @@
                     <option value="add">Add Expense</option>
                     <option value="list">Expenses</option>
                     <option value="analytics">Analytics</option>
-                    <option value="income">Income & Settings</option>
+                    <option value="income">Income</option>
+                    <option value="settings">Settings</option>
                 </select>
             </div>
 
             <div id="addView" class="view-content active">
-                <!-- Unified stat cards -->
+                <!-- Stat cards with proper contrast -->
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-md); margin-bottom: var(--space-lg);">
                     <div style="background: var(--accent-sage); border-radius: var(--radius-md); padding: var(--space-lg);">
-                        <div style="font-size: 12px; color: var(--text-primary); margin-bottom: var(--space-xs); opacity: 0.7; font-weight: 500;">Today</div>
-                        <div style="font-size: 24px; font-weight: 600; color: var(--text-primary);">₹<span id="todayTotal">0</span></div>
+                        <div style="font-size: 12px; color: #2D302F; margin-bottom: var(--space-xs); opacity: 0.7; font-weight: 500;">Today</div>
+                        <div style="font-size: 24px; font-weight: 600; color: #2D302F;">₹<span id="todayTotal">0</span></div>
                     </div>
                     <div style="background: var(--accent-terra); border-radius: var(--radius-md); padding: var(--space-lg);">
-                        <div style="font-size: 12px; color: var(--text-primary); margin-bottom: var(--space-xs); opacity: 0.7; font-weight: 500;">This Month</div>
-                        <div style="font-size: 24px; font-weight: 600; color: var(--text-primary);">₹<span id="monthTotal">0</span></div>
+                        <div style="font-size: 12px; color: #2D302F; margin-bottom: var(--space-xs); opacity: 0.7; font-weight: 500;">This Month</div>
+                        <div style="font-size: 24px; font-weight: 600; color: #2D302F;">₹<span id="monthTotal">0</span></div>
                     </div>
                 </div>
                 
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-md); margin-bottom: var(--space-lg);">
                     <div style="background: var(--accent-sand); border-radius: var(--radius-md); padding: var(--space-lg);">
-                        <div style="font-size: 12px; color: var(--text-primary); margin-bottom: var(--space-xs); opacity: 0.7; font-weight: 500;">Income</div>
-                        <div style="font-size: 24px; font-weight: 600;" id="monthIncomeColor">₹<span id="monthIncome">0</span></div>
+                        <div style="font-size: 12px; color: #2D302F; margin-bottom: var(--space-xs); opacity: 0.7; font-weight: 500;">Income</div>
+                        <div style="font-size: 24px; font-weight: 600; color: #2D302F;">₹<span id="monthIncome">0</span></div>
                     </div>
                     <div style="background: var(--accent-clay); border-radius: var(--radius-md); padding: var(--space-lg);">
-                        <div style="font-size: 12px; color: var(--text-primary); margin-bottom: var(--space-xs); opacity: 0.7; font-weight: 500;">Balance</div>
-                        <div style="font-size: 24px; font-weight: 600;" id="balanceColor">₹<span id="balance">0</span></div>
+                        <div style="font-size: 12px; color: #2D302F; margin-bottom: var(--space-xs); opacity: 0.7; font-weight: 500;">Balance</div>
+                        <div style="font-size: 24px; font-weight: 600; color: #2D302F;">₹<span id="balance">0</span></div>
                     </div>
                 </div>
 
@@ -889,7 +914,10 @@
                     <h2 style="margin-bottom: 20px;">Your Income</h2>
                     <div id="incomeList" class="expenses-list"></div>
                 </div>
+            </div>
 
+            <!-- NEW: Settings View -->
+            <div id="settingsView" class="view-content">
                 <!-- Settings & Data -->
                 <div class="card">
                     <h2 style="margin-bottom: 20px;">Data Management</h2>
@@ -1293,13 +1321,13 @@
                         <div class="expense-info">
                             <div class="expense-description">${exp.description}</div>
                             <div class="expense-meta">
-                                <span class="expense-category">${exp.category}</span>
-                                ${exp.subcategory ? `<span class="expense-category expense-subcategory">${exp.subcategory}</span>` : ''}
+                                <span class="expense-category" data-category="${exp.category}">${exp.category}</span>
+                                ${exp.subcategory ? `<span class="expense-subcategory">${exp.subcategory}</span>` : ''}
                                 <span>${dateStr}</span>
                             </div>
                         </div>
-                        <div class="expense-amount">₹${exp.amount.toFixed(2)}</div>
-                        <button class="delete-btn" onclick="event.stopPropagation(); deleteExpense('${exp.id}')">×</button>
+                        <div class="expense-amount">₹${formatAmount(exp.amount)}</div>
+                        <button class="delete-btn" onclick="event.stopPropagation(); deleteExpense('${exp.id}')"></button>
                     </div>
                 `;
             });
@@ -1335,19 +1363,7 @@
             const balance = monthIncome - monthTotal;
             document.getElementById('balance').textContent = formatAmount(balance);
             
-            // Color balance based on positive/negative
-            const balanceEl = document.getElementById('balanceColor');
-            const incomeEl = document.getElementById('monthIncomeColor');
-            const positiveColor = '#3a3a3a'; // Dark for all numbers
-            const negativeColor = '#c47f7f'; // Coral for negative
-            
-            if (balance >= 0) {
-                balanceEl.style.color = positiveColor;
-            } else {
-                balanceEl.style.color = negativeColor;
-            }
-            
-            incomeEl.style.color = positiveColor;
+            // No dynamic coloring needed - all text is charcoal on colored backgrounds
         }
 
         window.deleteExpense = async function(expenseId) {
@@ -1382,6 +1398,8 @@
                 setDefaultIncomeDate();
                 loadIncome();
                 loadBudgets().then(() => displayBudgets());
+            } else if (tab === 'settings') {
+                document.getElementById('settingsView').classList.add('active');
                 loadCurrency();
             }
         };
@@ -1956,18 +1974,21 @@
                     const spent = categorySpending[category] || 0;
                     const percent = (spent / budget) * 100;
                     const isOverBudget = spent > budget;
-                    const color = isOverBudget ? '#dc3545' : (percent > 80 ? '#ffc107' : '#28a745');
+                    
+                    // Muted sage for normal, soft terracotta for over budget
+                    const fillColor = isOverBudget ? '#E29578' : '#84A59D';
+                    const textColor = isOverBudget ? '#E29578' : 'var(--text-primary)';
                     
                     html += `
-                        <div style="margin-bottom: 15px;">
-                            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                                <span style="font-weight: 600; color: var(--text-primary);">${category}</span>
-                                <span style="font-weight: bold; color: ${color};">₹${spent.toFixed(2)} / ₹${budget.toFixed(2)}</span>
+                        <div style="margin-bottom: var(--space-lg);">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: var(--space-sm);">
+                                <span style="font-weight: 500; color: var(--text-primary); font-size: 14px;">${category}</span>
+                                <span style="font-weight: 600; color: ${textColor}; font-size: 14px;">₹${formatAmount(spent)} / ₹${formatAmount(budget)}</span>
                             </div>
-                            <div style="background: #e0e0e0; height: 20px; border-radius: 4px; overflow: hidden;">
-                                <div style="background: ${color}; height: 100%; width: ${Math.min(percent, 100)}%;"></div>
+                            <div style="background: #F0F0F0; height: 12px; border-radius: 999px; overflow: hidden;">
+                                <div style="background: ${fillColor}; height: 100%; width: ${Math.min(percent, 100)}%; border-radius: 999px; transition: width 0.3s ease;"></div>
                             </div>
-                            ${isOverBudget ? '<p style="color: #dc3545; font-size: 12px; margin-top: 3px;">⚠️ Over budget!</p>' : ''}
+                            ${isOverBudget ? '<p style="color: #E29578; font-size: 12px; margin-top: var(--space-xs); font-weight: 500;">⚠️ Over budget</p>' : ''}
                         </div>
                     `;
                 });
