@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="color-scheme" content="light dark">
-    <title>Expense Tracker</title>
+    <title>Expense Tracker v2.1 - Analytics Fixed</title>
     
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -884,29 +884,6 @@
             </div>
 
             <div id="addView" class="view-content active">
-                <!-- Stat cards with proper contrast -->
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-md); margin-bottom: var(--space-lg);">
-                    <div style="background: var(--accent-sage); border-radius: var(--radius-md); padding: var(--space-lg); min-width: 0;">
-                        <div style="font-size: 12px; color: #2D302F; margin-bottom: var(--space-xs); opacity: 0.7; font-weight: 500;">Today</div>
-                        <div style="font-size: clamp(18px, 5vw, 24px); font-weight: 600; color: #2D302F; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">₹<span id="todayTotal">0</span></div>
-                    </div>
-                    <div style="background: var(--accent-terra); border-radius: var(--radius-md); padding: var(--space-lg); min-width: 0;">
-                        <div style="font-size: 12px; color: #2D302F; margin-bottom: var(--space-xs); opacity: 0.7; font-weight: 500;">This Month</div>
-                        <div style="font-size: clamp(18px, 5vw, 24px); font-weight: 600; color: #2D302F; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">₹<span id="monthTotal">0</span></div>
-                    </div>
-                </div>
-                
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-md); margin-bottom: var(--space-lg);">
-                    <div style="background: var(--accent-sand); border-radius: var(--radius-md); padding: var(--space-lg); min-width: 0;">
-                        <div style="font-size: 12px; color: #2D302F; margin-bottom: var(--space-xs); opacity: 0.7; font-weight: 500;">Income</div>
-                        <div style="font-size: clamp(18px, 5vw, 24px); font-weight: 600; color: #2D302F; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">₹<span id="monthIncome">0</span></div>
-                    </div>
-                    <div style="background: var(--accent-clay); border-radius: var(--radius-md); padding: var(--space-lg); min-width: 0;">
-                        <div style="font-size: 12px; color: #2D302F; margin-bottom: var(--space-xs); opacity: 0.7; font-weight: 500;">Balance</div>
-                        <div style="font-size: clamp(18px, 5vw, 24px); font-weight: 600; color: #2D302F; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">₹<span id="balance">0</span></div>
-                    </div>
-                </div>
-
                 <div class="card">
                     <h2 style="margin-bottom: 20px;">Add Expense</h2>
                     
@@ -1547,15 +1524,21 @@
                 }
             });
             
-            document.getElementById('todayTotal').textContent = formatAmount(todayTotal);
-            document.getElementById('monthTotal').textContent = formatAmount(monthTotal);
+            // Only update elements if they exist (stat cards removed from Add Expense view)
+            const todayEl = document.getElementById('todayTotal');
+            const monthEl = document.getElementById('monthTotal');
+            const balanceEl = document.getElementById('balance');
+            const monthIncomeEl = document.getElementById('monthIncome');
             
-            // Update balance
-            const monthIncome = parseFloat(document.getElementById('monthIncome').textContent || 0);
-            const balance = monthIncome - monthTotal;
-            document.getElementById('balance').textContent = formatAmount(balance);
+            if (todayEl) todayEl.textContent = formatAmount(todayTotal);
+            if (monthEl) monthEl.textContent = formatAmount(monthTotal);
             
-            // No dynamic coloring needed - all text is charcoal on colored backgrounds
+            // Update balance if elements exist
+            if (balanceEl && monthIncomeEl) {
+                const monthIncome = parseFloat(monthIncomeEl.textContent || 0);
+                const balance = monthIncome - monthTotal;
+                balanceEl.textContent = formatAmount(balance);
+            }
         }
 
         window.deleteExpense = async function(expenseId) {
@@ -1955,7 +1938,7 @@
             sorted.forEach(([category, amount]) => {
                 const percent = ((amount / total) * 100).toFixed(1);
                 
-                html += `
+                const cardHTML = `
                     <div class="analytics-card">
                         <div class="analytics-card-header">
                             <div class="analytics-card-category">${category}</div>
@@ -1965,6 +1948,9 @@
                         <div class="analytics-card-percent">${percent}% of total</div>
                     </div>
                 `;
+                
+                console.log(`Card for ${category}: Period label = "${periodLabel}"`);
+                html += cardHTML;
             });
             
             grid.innerHTML = html;
@@ -2211,12 +2197,21 @@
                 }
             });
             
-            document.getElementById('monthIncome').textContent = monthIncome.toFixed(2);
+            // Only update elements if they exist (stat cards removed from Add Expense view)
+            const monthIncomeEl = document.getElementById('monthIncome');
+            const monthTotalEl = document.getElementById('monthTotal');
+            const balanceEl = document.getElementById('balance');
             
-            // Update balance
-            const monthExpense = parseFloat(document.getElementById('monthTotal').textContent);
-            const balance = monthIncome - monthExpense;
-            document.getElementById('balance').textContent = balance.toFixed(2);
+            if (monthIncomeEl) {
+                monthIncomeEl.textContent = monthIncome.toFixed(2);
+            }
+            
+            // Update balance if elements exist
+            if (balanceEl && monthTotalEl) {
+                const monthExpense = parseFloat(monthTotalEl.textContent || 0);
+                const balance = monthIncome - monthExpense;
+                balanceEl.textContent = balance.toFixed(2);
+            }
         }
 
         window.deleteIncome = async function(incomeId) {
