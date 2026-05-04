@@ -1767,12 +1767,29 @@
             // Find max amount for scaling
             const maxAmount = Math.max(...dataArray.map(d => d.amount));
             
-            // Create simple CSS bar chart
-            let html = '<div style="display: flex; align-items: flex-end; gap: 4px; height: 180px; padding: 20px 0;">';
+            console.log('Max amount for scaling:', maxAmount);
+            
+            // Safe format function
+            const safeFormat = (amount) => {
+                try {
+                    if (typeof formatAmount === 'function') {
+                        return formatAmount(amount);
+                    }
+                    const num = parseFloat(amount) || 0;
+                    return num % 1 === 0 
+                        ? num.toLocaleString('en-IN', { maximumFractionDigits: 0 })
+                        : num.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                } catch (e) {
+                    return String(amount);
+                }
+            };
+            
+            // Create simple CSS bar chart with enhanced visibility
+            let html = '<div style="display: flex; align-items: flex-end; gap: 6px; height: 160px; padding: 10px 0; background: transparent;">';
             
             dataArray.forEach(item => {
                 const heightPercent = (item.amount / maxAmount) * 100;
-                const barHeight = Math.max(heightPercent, 5); // Minimum 5% visibility
+                const barHeight = Math.max(heightPercent, 8); // Minimum 8% visibility
                 
                 html += `
                     <div style="
@@ -1783,31 +1800,34 @@
                         justify-content: flex-end;
                         cursor: pointer;
                         position: relative;
-                        min-width: 8px;
-                    " title="${item.displayDate}: ₹${formatAmount(item.amount)}">
+                        min-width: 12px;
+                        height: 100%;
+                    " title="${item.displayDate}: ₹${safeFormat(item.amount)}">
                         <div style="
                             width: 100%;
                             height: ${barHeight}%;
-                            background: linear-gradient(to top, #84A59D, #a8c5b0);
+                            background: linear-gradient(180deg, #a8c5b0 0%, #84A59D 100%);
                             border-radius: 4px 4px 0 0;
-                            transition: opacity 0.2s;
-                        " onmouseover="this.style.opacity='0.7'" onmouseout="this.style.opacity='1'"></div>
+                            transition: all 0.2s ease;
+                            box-shadow: 0 1px 3px rgba(132, 165, 157, 0.3);
+                        " onmouseover="this.style.opacity='0.8'; this.style.transform='translateY(-2px)'" 
+                           onmouseout="this.style.opacity='1'; this.style.transform='translateY(0)'"></div>
                     </div>
                 `;
             });
             
             html += '</div>';
             
-            // Add legend
+            // Add legend with first and last dates
             html += `
-                <div style="display: flex; justify-content: space-between; padding: 0 4px; font-size: 11px; color: var(--text-secondary);">
+                <div style="display: flex; justify-content: space-between; padding: 8px 4px 0 4px; font-size: 12px; color: var(--text-secondary); font-weight: 500;">
                     <span>${dataArray[0].displayDate}</span>
-                    <span>${dataArray[dataArray.length - 1].displayDate}</span>
+                    <span style="text-align: right;">${dataArray[dataArray.length - 1].displayDate}</span>
                 </div>
             `;
             
             chartContainer.innerHTML = html;
-            console.log('Simple bar chart rendered successfully');
+            console.log('Bar chart rendered successfully with', dataArray.length, 'bars');
         }
 
         // Analytics Functions
