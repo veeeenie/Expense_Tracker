@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Expense Tracker</title>
     
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
     <!-- PWA Meta Tags -->
     <meta name="description" content="Track your daily expenses with cloud sync">
     <meta name="theme-color" content="#000000">
@@ -256,7 +259,44 @@
         .btn-secondary:hover {
             background: var(--bg-secondary);
         }
+
+        /* Icon buttons with icons on the left */
+        .btn-icon {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            justify-content: flex-start;
+        }
+
+        .btn-icon svg {
+            width: 18px;
+            height: 18px;
+            stroke-width: 2;
+        }
+
+        /* Ghost buttons - minimal, icon-only */
+        .btn-ghost {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: var(--space-xs);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: var(--radius-sm);
+            transition: all 0.2s ease;
+        }
+
+        .btn-ghost:hover {
             background: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+
+        .btn-ghost svg {
+            width: 20px;
+            height: 20px;
+            stroke-width: 2;
         }
 
         .auth-switch {
@@ -745,8 +785,12 @@
             </div>
 
             <div class="header-controls">
-                <button class="icon-btn" onclick="exportToCSV()" title="Export to CSV">📥</button>
-                <button class="icon-btn" onclick="toggleDarkMode()" id="themeToggle" title="Toggle Dark Mode">🌙</button>
+                <button class="btn-ghost" onclick="exportToCSV()" title="Export to CSV">
+                    <i data-lucide="download"></i>
+                </button>
+                <button class="btn-ghost" onclick="toggleDarkMode()" id="themeToggle" title="Toggle Dark Mode">
+                    <i data-lucide="moon" id="themeIcon"></i>
+                </button>
             </div>
 
             <div class="header">
@@ -922,17 +966,20 @@
                 <div class="card">
                     <h2 style="margin-bottom: 20px;">Data Management</h2>
                     
-                    <button class="btn-secondary" onclick="backupData()" style="margin-bottom: 10px; width: 100%; padding: 12px;">
-                        📥 Backup All Data
+                    <button class="btn-secondary btn-icon" onclick="backupData()" style="margin-bottom: 10px; width: 100%; padding: 12px;">
+                        <i data-lucide="download-cloud"></i>
+                        <span>Backup All Data</span>
                     </button>
                     
-                    <button class="btn-secondary" onclick="document.getElementById('restoreInput').click()" style="margin-bottom: 10px; width: 100%; padding: 12px;">
-                        📤 Restore from Backup
+                    <button class="btn-secondary btn-icon" onclick="document.getElementById('restoreInput').click()" style="margin-bottom: 10px; width: 100%; padding: 12px;">
+                        <i data-lucide="upload-cloud"></i>
+                        <span>Restore from Backup</span>
                     </button>
                     <input type="file" id="restoreInput" accept=".json" style="display: none;" onchange="restoreData(event)">
                     
-                    <button class="btn-secondary" onclick="document.getElementById('importCSV').click()" style="margin-bottom: 10px; width: 100%; padding: 12px;">
-                        📊 Import CSV
+                    <button class="btn-secondary btn-icon" onclick="document.getElementById('importCSV').click()" style="margin-bottom: 10px; width: 100%; padding: 12px;">
+                        <i data-lucide="file-text"></i>
+                        <span>Import CSV</span>
                     </button>
                     <input type="file" id="importCSV" accept=".csv" style="display: none;" onchange="importCSV(event)">
                     
@@ -1100,6 +1147,9 @@
             document.getElementById('userEmail').textContent = currentUser.email;
             loadTheme(); // Load theme preference
             setupExpenseTracker();
+            
+            // Initialize Lucide icons
+            setTimeout(() => lucide.createIcons(), 100);
         }
 
         window.showLogin = function() {
@@ -1711,9 +1761,10 @@
             html.setAttribute('data-theme', newTheme);
             localStorage.setItem('theme', newTheme);
             
-            const toggle = document.getElementById('themeToggle');
-            if (toggle) {
-                toggle.textContent = newTheme === 'dark' ? '☀️' : '🌙';
+            const icon = document.getElementById('themeIcon');
+            if (icon) {
+                icon.setAttribute('data-lucide', newTheme === 'dark' ? 'sun' : 'moon');
+                lucide.createIcons();
             }
             
             console.log('Dark mode toggled to:', newTheme);
@@ -1724,9 +1775,10 @@
             console.log('Loading saved theme:', savedTheme);
             
             document.documentElement.setAttribute('data-theme', savedTheme);
-            const toggle = document.getElementById('themeToggle');
-            if (toggle) {
-                toggle.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+            const icon = document.getElementById('themeIcon');
+            if (icon) {
+                icon.setAttribute('data-lucide', savedTheme === 'dark' ? 'sun' : 'moon');
+                lucide.createIcons();
             }
         };
 
