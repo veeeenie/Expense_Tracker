@@ -2,18 +2,23 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="color-scheme" content="light dark">
     <title>Expense Tracker</title>
     
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
     
+    <!-- Recharts - Lightweight charting library -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/recharts@2.5.0/dist/Recharts.js"></script>
+    
     <!-- PWA Meta Tags -->
     <meta name="description" content="Track your daily expenses with cloud sync">
-    <meta name="theme-color" content="#000000">
+    <meta name="theme-color" content="#fafaf8">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Expenses">
     <link rel="manifest" href="/manifest.json">
     <link rel="apple-touch-icon" href="/icon-192.png">
@@ -93,6 +98,9 @@
             font-weight: 400;
             font-size: 16px;
             line-height: 1.5;
+            /* iOS safe areas */
+            padding-top: env(safe-area-inset-top);
+            padding-bottom: env(safe-area-inset-bottom);
         }
 
         .container {
@@ -100,7 +108,7 @@
             width: 100%;
             margin: 0 auto;
             padding: 16px;
-            padding-bottom: 30px;
+            padding-bottom: calc(30px + env(safe-area-inset-bottom));
             overflow-x: hidden;
         }
 
@@ -573,6 +581,8 @@
             align-items: center;
             justify-content: flex-end;
             margin-bottom: 10px;
+            /* iOS safe area - avoid notch */
+            padding-top: env(safe-area-inset-top);
         }
 
         .icon-btn {
@@ -611,9 +621,42 @@
             max-width: 100%;
         }
 
+        /* Spending Trend Chart */
+        .spending-chart {
+            width: 100%;
+            height: 180px;
+            margin-bottom: var(--space-lg);
+        }
+
+        /* Custom Recharts Tooltip */
+        .chart-tooltip {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: var(--space-sm);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .chart-tooltip-label {
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+        }
+
+        .chart-tooltip-value {
+            font-size: 16px;
+            font-weight: 600;
+            color: #2D302F;
+        }
+
         @media (max-width: 400px) {
             .analytics-grid {
                 gap: 10px;
+            }
+            
+            .spending-chart {
+                height: 140px;
             }
         }
 
@@ -853,9 +896,32 @@
                 <div class="card">
                     <h2 style="margin-bottom: 20px;">Add Expense</h2>
                     
+                    <!-- Quick Add Field -->
+                    <div class="form-group">
+                        <label for="quickAdd">Quick Add</label>
+                        <input 
+                            type="text" 
+                            id="quickAdd" 
+                            placeholder="e.g., '250 Futsal' or 'Coffee 150'"
+                            style="background: var(--accent-sand); border: 2px solid var(--accent-clay); font-weight: 500;"
+                            onkeypress="if(event.key === 'Enter') { parseAndAddExpense(); event.preventDefault(); }"
+                        >
+                        <p style="font-size: 12px; color: var(--text-secondary); margin-top: 6px;">Type amount and description, press Enter to add</p>
+                    </div>
+                    
+                    <div style="text-align: center; margin: 20px 0; color: var(--text-secondary); font-size: 13px; font-weight: 500;">— OR —</div>
+                    
                     <div class="form-group">
                         <label for="amount">Amount (₹)</label>
-                        <input type="number" id="amount" placeholder="Enter amount" min="0" step="0.01">
+                        <input 
+                            type="number" 
+                            id="amount" 
+                            placeholder="Enter amount" 
+                            min="0" 
+                            step="0.01"
+                            inputmode="decimal"
+                            pattern="[0-9]*"
+                        >
                     </div>
 
                     <div class="form-group">
@@ -894,6 +960,12 @@
             </div>
 
             <div id="analyticsView" class="view-content">
+                <!-- Daily Spending Trend Chart -->
+                <div class="card">
+                    <h2 style="margin-bottom: 15px;">Daily Spending</h2>
+                    <div id="spendingTrendChart" class="spending-chart"></div>
+                </div>
+                
                 <div class="card">
                     <h2 style="margin-bottom: 15px;">Analytics</h2>
                     
@@ -944,7 +1016,7 @@
                     
                     <div class="form-group">
                         <label for="incomeAmount">Amount (₹)</label>
-                        <input type="number" id="incomeAmount" placeholder="Enter amount" min="0" step="0.01">
+                        <input type="number" id="incomeAmount" placeholder="Enter amount" min="0" step="0.01" inputmode="decimal" pattern="[0-9]*">
                     </div>
 
                     <div class="form-group">
@@ -1299,6 +1371,61 @@
             group.style.display = 'block';
         }
 
+        // QUICK ADD PARSER
+        window.parseAndAddExpense = function() {
+            const quickInput = document.getElementById('quickAdd').value.trim();
+            if (!quickInput) {
+                alert('Please enter something like "250 Futsal" or "Coffee 150"');
+                return;
+            }
+
+            // Extract number (amount)
+            const numberMatch = quickInput.match(/\d+(\.\d+)?/);
+            const amount = numberMatch ? parseFloat(numberMatch[0]) : null;
+
+            // Extract text (description)
+            const text = quickInput.replace(/\d+(\.\d+)?/g, '').trim();
+
+            if (!amount) {
+                alert('Please include an amount (e.g., "250 Futsal")');
+                return;
+            }
+
+            // Category keyword mapping
+            const categoryKeywords = {
+                'Food': ['food', 'lunch', 'dinner', 'breakfast', 'meal', 'restaurant', 'cafe', 'coffee', 'tea', 'snack', 'pizza', 'burger'],
+                'Groceries': ['grocery', 'groceries', 'vegetables', 'fruits', 'milk', 'bread', 'supermarket', 'market'],
+                'Utilities': ['electricity', 'water', 'gas', 'internet', 'wifi', 'phone', 'mobile', 'bill', 'utility'],
+                'Insurance': ['insurance', 'policy', 'premium'],
+                'Health': ['doctor', 'medicine', 'pharmacy', 'hospital', 'medical', 'health', 'clinic', 'gym'],
+                'Entertainment': ['movie', 'cinema', 'netflix', 'spotify', 'game', 'concert', 'show', 'futsal', 'sports', 'football'],
+                'Shopping': ['shopping', 'clothes', 'shoes', 'shirt', 'pants', 'dress', 'amazon', 'flipkart'],
+                'Miscellaneous': ['other', 'misc', 'miscellaneous']
+            };
+
+            // Match category
+            let matchedCategory = 'Miscellaneous';
+            const lowerText = text.toLowerCase();
+            
+            for (const [category, keywords] of Object.entries(categoryKeywords)) {
+                if (keywords.some(keyword => lowerText.includes(keyword))) {
+                    matchedCategory = category;
+                    break;
+                }
+            }
+
+            // Populate form fields
+            document.getElementById('amount').value = amount;
+            document.getElementById('description').value = text || '';
+            document.getElementById('category').value = matchedCategory;
+            
+            // Clear quick add field
+            document.getElementById('quickAdd').value = '';
+
+            // Auto-submit
+            addExpense();
+        };
+
         window.addExpense = async function() {
             const amount = document.getElementById('amount').value;
             const date = document.getElementById('expenseDate').value;
@@ -1572,6 +1699,75 @@
             }
         };
 
+        // DAILY SPENDING TREND CHART
+        function displayDailySpendingChart(expenses) {
+            const chartContainer = document.getElementById('spendingTrendChart');
+            if (!chartContainer) return;
+
+            // Group expenses by day
+            const dailyData = {};
+            expenses.forEach(exp => {
+                const date = exp.date;
+                if (!dailyData[date]) {
+                    dailyData[date] = 0;
+                }
+                dailyData[date] += exp.amount;
+            });
+
+            // Convert to array and sort by date
+            const dataArray = Object.entries(dailyData)
+                .map(([date, amount]) => ({
+                    date: date,
+                    amount: amount,
+                    displayDate: new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+                }))
+                .sort((a, b) => new Date(a.date) - new Date(b.date));
+
+            // If no data, show empty state
+            if (dataArray.length === 0) {
+                chartContainer.innerHTML = '<p style="color: var(--text-secondary); text-align: center; padding: 40px 0;">No spending data for this period</p>';
+                return;
+            }
+
+            // Custom tooltip component
+            const CustomTooltip = ({ active, payload }) => {
+                if (active && payload && payload.length) {
+                    return React.createElement('div', { className: 'chart-tooltip' },
+                        React.createElement('div', { className: 'chart-tooltip-label' }, payload[0].payload.displayDate),
+                        React.createElement('div', { className: 'chart-tooltip-value' }, `₹${formatAmount(payload[0].value)}`)
+                    );
+                }
+                return null;
+            };
+
+            // Create minimal area chart using Recharts
+            const chart = React.createElement(Recharts.ResponsiveContainer, { width: '100%', height: '100%' },
+                React.createElement(Recharts.AreaChart, {
+                    data: dataArray,
+                    margin: { top: 10, right: 0, left: 0, bottom: 0 }
+                },
+                    React.createElement(Recharts.defs, null,
+                        React.createElement('linearGradient', { id: 'colorAmount', x1: '0', y1: '0', x2: '0', y2: '1' },
+                            React.createElement('stop', { offset: '5%', stopColor: '#84A59D', stopOpacity: 0.3 }),
+                            React.createElement('stop', { offset: '95%', stopColor: '#84A59D', stopOpacity: 0 })
+                        )
+                    ),
+                    React.createElement(Recharts.Tooltip, { content: CustomTooltip, cursor: false }),
+                    React.createElement(Recharts.Area, {
+                        type: 'monotone',
+                        dataKey: 'amount',
+                        stroke: '#84A59D',
+                        strokeWidth: 2,
+                        fill: 'url(#colorAmount)',
+                        animationDuration: 800
+                    })
+                )
+            );
+
+            // Render chart
+            ReactDOM.render(chart, chartContainer);
+        }
+
         // Analytics Functions
         function generateAnalytics() {
             const period = document.getElementById('analyticsMonth')?.value || 'current';
@@ -1616,6 +1812,7 @@
                 });
                 
                 // Display all analytics
+                displayDailySpendingChart(filteredExpenses);
                 displayAnalyticsCards(categoryTotals, totalExpenses);
                 displaySpendingIncomeChart(totalIncome, totalExpenses);
                 displayWeeklyBreakdown(filteredExpenses);
