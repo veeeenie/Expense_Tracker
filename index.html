@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="light dark">
     <title>Expense Tracker</title>
     
     <!-- Lucide Icons -->
@@ -71,6 +72,11 @@
         html {
             overflow-x: hidden;
             width: 100%;
+            color-scheme: light;
+        }
+
+        html[data-theme="dark"] {
+            color-scheme: dark;
         }
 
         body {
@@ -198,9 +204,16 @@
             transition: all 0.2s ease;
         }
 
+        /* Ensure select options inherit dark mode */
+        select option {
+            background: var(--bg-card);
+            color: var(--text-primary);
+        }
+
         input[type="date"] {
             -webkit-appearance: none;
             appearance: none;
+            color-scheme: light dark; /* Native dark mode for date picker */
         }
 
         input:focus, select:focus {
@@ -807,6 +820,7 @@
                     <option value="add">Add Expense</option>
                     <option value="list">Expenses</option>
                     <option value="analytics">Analytics</option>
+                    <option value="budgets">Budgets</option>
                     <option value="income">Income</option>
                     <option value="settings">Settings</option>
                 </select>
@@ -874,7 +888,7 @@
 
             <div id="listView" class="view-content">
                 <div class="card">
-                    <h2 style="margin-bottom: 20px; color: #000;">Your Expenses</h2>
+                    <h2 style="margin-bottom: 20px;">Your Expenses</h2>
                     <div id="expensesList" class="expenses-list"></div>
                 </div>
             </div>
@@ -910,7 +924,8 @@
                 </div>
             </div>
 
-            <div id="incomeView" class="view-content">
+            <!-- NEW: Budgets View -->
+            <div id="budgetsView" class="view-content">
                 <!-- Budget Management -->
                 <div class="card">
                     <h2 style="margin-bottom: 20px;">Monthly Budgets</h2>
@@ -919,7 +934,10 @@
                         Set Category Budgets
                     </button>
                 </div>
+            </div>
 
+            <!-- Income View (income only) -->
+            <div id="incomeView" class="view-content">
                 <!-- Add Income -->
                 <div class="card">
                     <h2 style="margin-bottom: 20px;">Add Income</h2>
@@ -1001,7 +1019,7 @@
     <div id="editModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 style="color: #000;">Edit Expense</h2>
+                <h2>Edit Expense</h2>
                 <button class="modal-close" onclick="closeEditModal()">×</button>
             </div>
             
@@ -1443,11 +1461,13 @@
             } else if (tab === 'analytics') {
                 document.getElementById('analyticsView').classList.add('active');
                 generateAnalytics();
+            } else if (tab === 'budgets') {
+                document.getElementById('budgetsView').classList.add('active');
+                loadBudgets().then(() => displayBudgets());
             } else if (tab === 'income') {
                 document.getElementById('incomeView').classList.add('active');
                 setDefaultIncomeDate();
                 loadIncome();
-                loadBudgets().then(() => displayBudgets());
             } else if (tab === 'settings') {
                 document.getElementById('settingsView').classList.add('active');
                 loadCurrency();
