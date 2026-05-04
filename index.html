@@ -1713,47 +1713,92 @@
                 return;
             }
 
-            // Validate expenses array
-            if (!Array.isArray(expenses) || expenses.length === 0) {
+            // Check if Recharts is loaded
+            if (typeof Recharts === 'undefined' || typeof React === 'undefined' || typeof ReactDOM === 'undefined') {
+                console.error('Recharts libraries not loaded');
+                chartContainer.innerHTML = '<div class="chart-empty">Chart library loading...</div>';
+                return;
+            }
+
+            // Strict validation of expenses array
+            if (!expenses || !Array.isArray(expenses) || expenses.length === 0) {
                 chartContainer.innerHTML = '<div class="chart-empty">No data for this period</div>';
                 return;
             }
 
-            // Group expenses by day
+            // Group expenses by day with strict validation
             const dailyData = {};
             expenses.forEach(exp => {
-                if (!exp || !exp.date || !exp.amount) return;
-                const date = exp.date;
+                // Skip invalid entries
+                if (!exp || typeof exp !== 'object') return;
+                if (!exp.date || typeof exp.date !== 'string') return;
+                if (exp.amount === null || exp.amount === undefined) return;
+                
+                const amount = parseFloat(exp.amount);
+                if (isNaN(amount) || amount < 0) return;
+                
+                const date = exp.date.trim();
+                if (!date) return;
+                
+                // Validate date format
+                const dateObj = new Date(date);
+                if (isNaN(dateObj.getTime())) return;
+                
                 if (!dailyData[date]) {
                     dailyData[date] = 0;
                 }
-                dailyData[date] += parseFloat(exp.amount) || 0;
+                dailyData[date] += amount;
             });
 
-            // Convert to array and sort by date
+            // Convert to array with safe date formatting
             const dataArray = Object.entries(dailyData)
-                .map(([date, amount]) => ({
-                    date: date,
-                    amount: amount,
-                    displayDate: new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-                }))
+                .map(([date, amount]) => {
+                    try {
+                        const dateObj = new Date(date);
+                        return {
+                            date: date,
+                            amount: parseFloat(amount.toFixed(2)),
+                            displayDate: dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+                        };
+                    } catch (e) {
+                        console.error('Date formatting error:', e, date);
+                        return null;
+                    }
+                })
+                .filter(item => item !== null)
                 .sort((a, b) => new Date(a.date) - new Date(b.date));
 
             // If no valid data after processing, show empty state
-            if (dataArray.length === 0) {
+            if (!dataArray || dataArray.length === 0) {
                 chartContainer.innerHTML = '<div class="chart-empty">No data for this period</div>';
                 return;
             }
 
-            console.log('Chart data:', dataArray); // Debug
+            console.log('Chart rendering with data:', dataArray);
 
             try {
+                // Safe format amount function
+                const safeFormatAmount = (value) => {
+                    try {
+                        if (typeof formatAmount === 'function') {
+                            return formatAmount(value);
+                        }
+                        const num = parseFloat(value) || 0;
+                        if (num % 1 === 0) {
+                            return num.toLocaleString('en-IN', { maximumFractionDigits: 0 });
+                        }
+                        return num.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                    } catch (e) {
+                        return String(value);
+                    }
+                };
+
                 // Custom tooltip component
                 const CustomTooltip = ({ active, payload }) => {
-                    if (active && payload && payload.length) {
+                    if (active && payload && payload.length && payload[0].payload) {
                         return React.createElement('div', { className: 'chart-tooltip' },
-                            React.createElement('div', { className: 'chart-tooltip-label' }, payload[0].payload.displayDate),
-                            React.createElement('div', { className: 'chart-tooltip-value' }, `₹${formatAmount(payload[0].value)}`)
+                            React.createElement('div', { className: 'chart-tooltip-label' }, payload[0].payload.displayDate || ''),
+                            React.createElement('div', { className: 'chart-tooltip-value' }, `₹${safeFormatAmount(payload[0].value)}`)
                         );
                     }
                     return null;
@@ -1786,9 +1831,10 @@
                 // Clear container and render chart
                 chartContainer.innerHTML = '';
                 ReactDOM.render(chart, chartContainer);
+                console.log('Chart rendered successfully');
             } catch (error) {
                 console.error('Chart rendering error:', error);
-                chartContainer.innerHTML = '<div class="chart-empty">Error loading chart</div>';
+                chartContainer.innerHTML = '<div class="chart-empty">Unable to load chart</div>';
             }
         }
 
@@ -1837,7 +1883,7 @@
                 
                 // Display all analytics
                 displayDailySpendingChart(filteredExpenses);
-                displayAnalyticsCards(categoryTotals, totalExpenses);
+                displayAnalyticsCards(categoryTotals, totalExpenses, period);
                 displaySpendingIncomeChart(totalIncome, totalExpenses);
                 displayWeeklyBreakdown(filteredExpenses);
             }).catch(error => {
@@ -1873,13 +1919,24 @@
             });
         }
 
-        function displayAnalyticsCards(categoryTotals, total) {
+        function displayAnalyticsCards(categoryTotals, total, period) {
             const grid = document.getElementById('analyticsGrid');
             
             if (total === 0) {
                 grid.innerHTML = '<div class="empty-state" style="grid-column: 1/-1;"><p style="color: var(--text-secondary);">No expenses for this period</p></div>';
                 return;
             }
+            
+            // Period labels
+            const periodLabels = {
+                'current': 'This Month',
+                'last': 'Last Month',
+                'last30': 'Last 30 Days',
+                'last90': 'Last 90 Days',
+                'all': 'All Time'
+            };
+            
+            const periodLabel = periodLabels[period] || 'This Month';
             
             let html = '';
             
@@ -1895,7 +1952,7 @@
                             <div class="analytics-card-category">${category}</div>
                         </div>
                         <div class="analytics-card-amount">₹${formatAmount(amount)}</div>
-                        <div class="analytics-card-period">Monthly</div>
+                        <div class="analytics-card-period">${periodLabel}</div>
                         <div class="analytics-card-percent">${percent}% of total</div>
                     </div>
                 `;
