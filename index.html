@@ -9,11 +9,6 @@
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
     
-    <!-- Recharts - Lightweight charting library -->
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/recharts@2.5.0/dist/Recharts.js"></script>
-    
     <!-- PWA Meta Tags -->
     <meta name="description" content="Track your daily expenses with cloud sync">
     <meta name="theme-color" content="#fafaf8">
@@ -1705,18 +1700,11 @@
             }
         };
 
-        // DAILY SPENDING TREND CHART
+        // DAILY SPENDING TREND CHART - SIMPLE CSS VERSION
         function displayDailySpendingChart(expenses) {
             const chartContainer = document.getElementById('spendingTrendChart');
             if (!chartContainer) {
                 console.error('Chart container not found');
-                return;
-            }
-
-            // Check if Recharts is loaded
-            if (typeof Recharts === 'undefined' || typeof React === 'undefined' || typeof ReactDOM === 'undefined') {
-                console.error('Recharts libraries not loaded');
-                chartContainer.innerHTML = '<div class="chart-empty">Chart library loading...</div>';
                 return;
             }
 
@@ -1776,66 +1764,50 @@
 
             console.log('Chart rendering with data:', dataArray);
 
-            try {
-                // Safe format amount function
-                const safeFormatAmount = (value) => {
-                    try {
-                        if (typeof formatAmount === 'function') {
-                            return formatAmount(value);
-                        }
-                        const num = parseFloat(value) || 0;
-                        if (num % 1 === 0) {
-                            return num.toLocaleString('en-IN', { maximumFractionDigits: 0 });
-                        }
-                        return num.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-                    } catch (e) {
-                        return String(value);
-                    }
-                };
-
-                // Custom tooltip component
-                const CustomTooltip = ({ active, payload }) => {
-                    if (active && payload && payload.length && payload[0].payload) {
-                        return React.createElement('div', { className: 'chart-tooltip' },
-                            React.createElement('div', { className: 'chart-tooltip-label' }, payload[0].payload.displayDate || ''),
-                            React.createElement('div', { className: 'chart-tooltip-value' }, `₹${safeFormatAmount(payload[0].value)}`)
-                        );
-                    }
-                    return null;
-                };
-
-                // Create minimal area chart using Recharts
-                const chart = React.createElement(Recharts.ResponsiveContainer, { width: '100%', height: 180 },
-                    React.createElement(Recharts.AreaChart, {
-                        data: dataArray,
-                        margin: { top: 10, right: 0, left: 0, bottom: 0 }
-                    },
-                        React.createElement(Recharts.defs, null,
-                            React.createElement('linearGradient', { id: 'colorAmount', x1: '0', y1: '0', x2: '0', y2: '1' },
-                                React.createElement('stop', { offset: '5%', stopColor: '#84A59D', stopOpacity: 0.3 }),
-                                React.createElement('stop', { offset: '95%', stopColor: '#84A59D', stopOpacity: 0 })
-                            )
-                        ),
-                        React.createElement(Recharts.Tooltip, { content: CustomTooltip, cursor: false }),
-                        React.createElement(Recharts.Area, {
-                            type: 'monotone',
-                            dataKey: 'amount',
-                            stroke: '#84A59D',
-                            strokeWidth: 2,
-                            fill: 'url(#colorAmount)',
-                            animationDuration: 800
-                        })
-                    )
-                );
-
-                // Clear container and render chart
-                chartContainer.innerHTML = '';
-                ReactDOM.render(chart, chartContainer);
-                console.log('Chart rendered successfully');
-            } catch (error) {
-                console.error('Chart rendering error:', error);
-                chartContainer.innerHTML = '<div class="chart-empty">Unable to load chart</div>';
-            }
+            // Find max amount for scaling
+            const maxAmount = Math.max(...dataArray.map(d => d.amount));
+            
+            // Create simple CSS bar chart
+            let html = '<div style="display: flex; align-items: flex-end; gap: 4px; height: 180px; padding: 20px 0;">';
+            
+            dataArray.forEach(item => {
+                const heightPercent = (item.amount / maxAmount) * 100;
+                const barHeight = Math.max(heightPercent, 5); // Minimum 5% visibility
+                
+                html += `
+                    <div style="
+                        flex: 1;
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                        justify-content: flex-end;
+                        cursor: pointer;
+                        position: relative;
+                        min-width: 8px;
+                    " title="${item.displayDate}: ₹${formatAmount(item.amount)}">
+                        <div style="
+                            width: 100%;
+                            height: ${barHeight}%;
+                            background: linear-gradient(to top, #84A59D, #a8c5b0);
+                            border-radius: 4px 4px 0 0;
+                            transition: opacity 0.2s;
+                        " onmouseover="this.style.opacity='0.7'" onmouseout="this.style.opacity='1'"></div>
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            
+            // Add legend
+            html += `
+                <div style="display: flex; justify-content: space-between; padding: 0 4px; font-size: 11px; color: var(--text-secondary);">
+                    <span>${dataArray[0].displayDate}</span>
+                    <span>${dataArray[dataArray.length - 1].displayDate}</span>
+                </div>
+            `;
+            
+            chartContainer.innerHTML = html;
+            console.log('Simple bar chart rendered successfully');
         }
 
         // Analytics Functions
