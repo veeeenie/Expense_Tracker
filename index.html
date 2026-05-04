@@ -625,7 +625,21 @@
         .spending-chart {
             width: 100%;
             height: 180px;
+            min-height: 180px;
             margin-bottom: var(--space-lg);
+        }
+
+        /* Empty chart state */
+        .chart-empty {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            min-height: 180px;
+            color: var(--text-secondary);
+            font-size: 14px;
+            text-align: center;
+            padding: var(--space-xl);
         }
 
         /* Custom Recharts Tooltip */
@@ -657,6 +671,11 @@
             
             .spending-chart {
                 height: 140px;
+                min-height: 140px;
+            }
+            
+            .chart-empty {
+                min-height: 140px;
             }
         }
 
@@ -872,44 +891,29 @@
             <div id="addView" class="view-content active">
                 <!-- Stat cards with proper contrast -->
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-md); margin-bottom: var(--space-lg);">
-                    <div style="background: var(--accent-sage); border-radius: var(--radius-md); padding: var(--space-lg);">
+                    <div style="background: var(--accent-sage); border-radius: var(--radius-md); padding: var(--space-lg); min-width: 0;">
                         <div style="font-size: 12px; color: #2D302F; margin-bottom: var(--space-xs); opacity: 0.7; font-weight: 500;">Today</div>
-                        <div style="font-size: 24px; font-weight: 600; color: #2D302F;">₹<span id="todayTotal">0</span></div>
+                        <div style="font-size: clamp(18px, 5vw, 24px); font-weight: 600; color: #2D302F; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">₹<span id="todayTotal">0</span></div>
                     </div>
-                    <div style="background: var(--accent-terra); border-radius: var(--radius-md); padding: var(--space-lg);">
+                    <div style="background: var(--accent-terra); border-radius: var(--radius-md); padding: var(--space-lg); min-width: 0;">
                         <div style="font-size: 12px; color: #2D302F; margin-bottom: var(--space-xs); opacity: 0.7; font-weight: 500;">This Month</div>
-                        <div style="font-size: 24px; font-weight: 600; color: #2D302F;">₹<span id="monthTotal">0</span></div>
+                        <div style="font-size: clamp(18px, 5vw, 24px); font-weight: 600; color: #2D302F; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">₹<span id="monthTotal">0</span></div>
                     </div>
                 </div>
                 
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-md); margin-bottom: var(--space-lg);">
-                    <div style="background: var(--accent-sand); border-radius: var(--radius-md); padding: var(--space-lg);">
+                    <div style="background: var(--accent-sand); border-radius: var(--radius-md); padding: var(--space-lg); min-width: 0;">
                         <div style="font-size: 12px; color: #2D302F; margin-bottom: var(--space-xs); opacity: 0.7; font-weight: 500;">Income</div>
-                        <div style="font-size: 24px; font-weight: 600; color: #2D302F;">₹<span id="monthIncome">0</span></div>
+                        <div style="font-size: clamp(18px, 5vw, 24px); font-weight: 600; color: #2D302F; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">₹<span id="monthIncome">0</span></div>
                     </div>
-                    <div style="background: var(--accent-clay); border-radius: var(--radius-md); padding: var(--space-lg);">
+                    <div style="background: var(--accent-clay); border-radius: var(--radius-md); padding: var(--space-lg); min-width: 0;">
                         <div style="font-size: 12px; color: #2D302F; margin-bottom: var(--space-xs); opacity: 0.7; font-weight: 500;">Balance</div>
-                        <div style="font-size: 24px; font-weight: 600; color: #2D302F;">₹<span id="balance">0</span></div>
+                        <div style="font-size: clamp(18px, 5vw, 24px); font-weight: 600; color: #2D302F; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">₹<span id="balance">0</span></div>
                     </div>
                 </div>
 
                 <div class="card">
                     <h2 style="margin-bottom: 20px;">Add Expense</h2>
-                    
-                    <!-- Quick Add Field -->
-                    <div class="form-group">
-                        <label for="quickAdd">Quick Add</label>
-                        <input 
-                            type="text" 
-                            id="quickAdd" 
-                            placeholder="e.g., '250 Futsal' or 'Coffee 150'"
-                            style="background: var(--accent-sand); border: 2px solid var(--accent-clay); font-weight: 500;"
-                            onkeypress="if(event.key === 'Enter') { parseAndAddExpense(); event.preventDefault(); }"
-                        >
-                        <p style="font-size: 12px; color: var(--text-secondary); margin-top: 6px;">Type amount and description, press Enter to add</p>
-                    </div>
-                    
-                    <div style="text-align: center; margin: 20px 0; color: var(--text-secondary); font-size: 13px; font-weight: 500;">— OR —</div>
                     
                     <div class="form-group">
                         <label for="amount">Amount (₹)</label>
@@ -1207,10 +1211,16 @@
 
         // Number formatting - no decimals unless needed
         function formatAmount(amount) {
-            if (amount % 1 === 0) {
-                return amount.toString(); // No decimals for whole numbers
+            // Convert to number and handle invalid inputs
+            const num = parseFloat(amount) || 0;
+            
+            // Format with Indian locale (adds commas)
+            if (num % 1 === 0) {
+                // Whole number - no decimals
+                return num.toLocaleString('en-IN', { maximumFractionDigits: 0 });
             }
-            return amount.toFixed(2); // Show decimals only if needed
+            // Has decimals - show 2 decimal places
+            return num.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         }
 
         // Auth state observer
@@ -1371,61 +1381,6 @@
             group.style.display = 'block';
         }
 
-        // QUICK ADD PARSER
-        window.parseAndAddExpense = function() {
-            const quickInput = document.getElementById('quickAdd').value.trim();
-            if (!quickInput) {
-                alert('Please enter something like "250 Futsal" or "Coffee 150"');
-                return;
-            }
-
-            // Extract number (amount)
-            const numberMatch = quickInput.match(/\d+(\.\d+)?/);
-            const amount = numberMatch ? parseFloat(numberMatch[0]) : null;
-
-            // Extract text (description)
-            const text = quickInput.replace(/\d+(\.\d+)?/g, '').trim();
-
-            if (!amount) {
-                alert('Please include an amount (e.g., "250 Futsal")');
-                return;
-            }
-
-            // Category keyword mapping
-            const categoryKeywords = {
-                'Food': ['food', 'lunch', 'dinner', 'breakfast', 'meal', 'restaurant', 'cafe', 'coffee', 'tea', 'snack', 'pizza', 'burger'],
-                'Groceries': ['grocery', 'groceries', 'vegetables', 'fruits', 'milk', 'bread', 'supermarket', 'market'],
-                'Utilities': ['electricity', 'water', 'gas', 'internet', 'wifi', 'phone', 'mobile', 'bill', 'utility'],
-                'Insurance': ['insurance', 'policy', 'premium'],
-                'Health': ['doctor', 'medicine', 'pharmacy', 'hospital', 'medical', 'health', 'clinic', 'gym'],
-                'Entertainment': ['movie', 'cinema', 'netflix', 'spotify', 'game', 'concert', 'show', 'futsal', 'sports', 'football'],
-                'Shopping': ['shopping', 'clothes', 'shoes', 'shirt', 'pants', 'dress', 'amazon', 'flipkart'],
-                'Miscellaneous': ['other', 'misc', 'miscellaneous']
-            };
-
-            // Match category
-            let matchedCategory = 'Miscellaneous';
-            const lowerText = text.toLowerCase();
-            
-            for (const [category, keywords] of Object.entries(categoryKeywords)) {
-                if (keywords.some(keyword => lowerText.includes(keyword))) {
-                    matchedCategory = category;
-                    break;
-                }
-            }
-
-            // Populate form fields
-            document.getElementById('amount').value = amount;
-            document.getElementById('description').value = text || '';
-            document.getElementById('category').value = matchedCategory;
-            
-            // Clear quick add field
-            document.getElementById('quickAdd').value = '';
-
-            // Auto-submit
-            addExpense();
-        };
-
         window.addExpense = async function() {
             const amount = document.getElementById('amount').value;
             const date = document.getElementById('expenseDate').value;
@@ -1469,6 +1424,28 @@
             }
         };
 
+        // Cached data to prevent unnecessary re-renders
+        let cachedExpenses = [];
+        let lastExpensesHash = '';
+
+        // Debounce helper
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        // Hash function to detect actual data changes
+        function hashExpenses(expenses) {
+            return JSON.stringify(expenses.map(e => `${e.id}-${e.amount}-${e.date}-${e.category}`));
+        }
+
         function loadExpenses() {
             const expensesRef = ref(database, `users/${currentUser.uid}/expenses`);
             
@@ -1484,8 +1461,33 @@
                 // Sort by date descending
                 expenses.sort((a, b) => new Date(b.date) - new Date(a.date));
                 
-                displayExpenses(expenses);
-                calculateTotals(expenses);
+                // Check if data actually changed
+                const newHash = hashExpenses(expenses);
+                if (newHash === lastExpensesHash) {
+                    return; // No actual changes, skip re-render
+                }
+                
+                lastExpensesHash = newHash;
+                cachedExpenses = expenses;
+                
+                // Only update what's currently visible
+                const currentView = document.querySelector('.view-content.active');
+                const viewId = currentView?.id;
+                
+                // Always update expense list if on list view
+                if (viewId === 'listView' || viewId === 'addView') {
+                    displayExpenses(expenses);
+                }
+                
+                // Always update totals (for stat cards)
+                if (viewId === 'addView') {
+                    calculateTotals(expenses);
+                }
+                
+                // Only regenerate analytics if on analytics view
+                if (viewId === 'analyticsView') {
+                    generateAnalytics();
+                }
             });
         }
 
@@ -1585,6 +1587,10 @@
                 document.getElementById('addView').classList.add('active');
             } else if (tab === 'list') {
                 document.getElementById('listView').classList.add('active');
+                // Refresh expense list when switching to this view
+                if (cachedExpenses.length > 0) {
+                    displayExpenses(cachedExpenses);
+                }
             } else if (tab === 'analytics') {
                 document.getElementById('analyticsView').classList.add('active');
                 generateAnalytics();
@@ -1702,16 +1708,26 @@
         // DAILY SPENDING TREND CHART
         function displayDailySpendingChart(expenses) {
             const chartContainer = document.getElementById('spendingTrendChart');
-            if (!chartContainer) return;
+            if (!chartContainer) {
+                console.error('Chart container not found');
+                return;
+            }
+
+            // Validate expenses array
+            if (!Array.isArray(expenses) || expenses.length === 0) {
+                chartContainer.innerHTML = '<div class="chart-empty">No data for this period</div>';
+                return;
+            }
 
             // Group expenses by day
             const dailyData = {};
             expenses.forEach(exp => {
+                if (!exp || !exp.date || !exp.amount) return;
                 const date = exp.date;
                 if (!dailyData[date]) {
                     dailyData[date] = 0;
                 }
-                dailyData[date] += exp.amount;
+                dailyData[date] += parseFloat(exp.amount) || 0;
             });
 
             // Convert to array and sort by date
@@ -1723,49 +1739,57 @@
                 }))
                 .sort((a, b) => new Date(a.date) - new Date(b.date));
 
-            // If no data, show empty state
+            // If no valid data after processing, show empty state
             if (dataArray.length === 0) {
-                chartContainer.innerHTML = '<p style="color: var(--text-secondary); text-align: center; padding: 40px 0;">No spending data for this period</p>';
+                chartContainer.innerHTML = '<div class="chart-empty">No data for this period</div>';
                 return;
             }
 
-            // Custom tooltip component
-            const CustomTooltip = ({ active, payload }) => {
-                if (active && payload && payload.length) {
-                    return React.createElement('div', { className: 'chart-tooltip' },
-                        React.createElement('div', { className: 'chart-tooltip-label' }, payload[0].payload.displayDate),
-                        React.createElement('div', { className: 'chart-tooltip-value' }, `₹${formatAmount(payload[0].value)}`)
-                    );
-                }
-                return null;
-            };
+            console.log('Chart data:', dataArray); // Debug
 
-            // Create minimal area chart using Recharts
-            const chart = React.createElement(Recharts.ResponsiveContainer, { width: '100%', height: '100%' },
-                React.createElement(Recharts.AreaChart, {
-                    data: dataArray,
-                    margin: { top: 10, right: 0, left: 0, bottom: 0 }
-                },
-                    React.createElement(Recharts.defs, null,
-                        React.createElement('linearGradient', { id: 'colorAmount', x1: '0', y1: '0', x2: '0', y2: '1' },
-                            React.createElement('stop', { offset: '5%', stopColor: '#84A59D', stopOpacity: 0.3 }),
-                            React.createElement('stop', { offset: '95%', stopColor: '#84A59D', stopOpacity: 0 })
-                        )
-                    ),
-                    React.createElement(Recharts.Tooltip, { content: CustomTooltip, cursor: false }),
-                    React.createElement(Recharts.Area, {
-                        type: 'monotone',
-                        dataKey: 'amount',
-                        stroke: '#84A59D',
-                        strokeWidth: 2,
-                        fill: 'url(#colorAmount)',
-                        animationDuration: 800
-                    })
-                )
-            );
+            try {
+                // Custom tooltip component
+                const CustomTooltip = ({ active, payload }) => {
+                    if (active && payload && payload.length) {
+                        return React.createElement('div', { className: 'chart-tooltip' },
+                            React.createElement('div', { className: 'chart-tooltip-label' }, payload[0].payload.displayDate),
+                            React.createElement('div', { className: 'chart-tooltip-value' }, `₹${formatAmount(payload[0].value)}`)
+                        );
+                    }
+                    return null;
+                };
 
-            // Render chart
-            ReactDOM.render(chart, chartContainer);
+                // Create minimal area chart using Recharts
+                const chart = React.createElement(Recharts.ResponsiveContainer, { width: '100%', height: 180 },
+                    React.createElement(Recharts.AreaChart, {
+                        data: dataArray,
+                        margin: { top: 10, right: 0, left: 0, bottom: 0 }
+                    },
+                        React.createElement(Recharts.defs, null,
+                            React.createElement('linearGradient', { id: 'colorAmount', x1: '0', y1: '0', x2: '0', y2: '1' },
+                                React.createElement('stop', { offset: '5%', stopColor: '#84A59D', stopOpacity: 0.3 }),
+                                React.createElement('stop', { offset: '95%', stopColor: '#84A59D', stopOpacity: 0 })
+                            )
+                        ),
+                        React.createElement(Recharts.Tooltip, { content: CustomTooltip, cursor: false }),
+                        React.createElement(Recharts.Area, {
+                            type: 'monotone',
+                            dataKey: 'amount',
+                            stroke: '#84A59D',
+                            strokeWidth: 2,
+                            fill: 'url(#colorAmount)',
+                            animationDuration: 800
+                        })
+                    )
+                );
+
+                // Clear container and render chart
+                chartContainer.innerHTML = '';
+                ReactDOM.render(chart, chartContainer);
+            } catch (error) {
+                console.error('Chart rendering error:', error);
+                chartContainer.innerHTML = '<div class="chart-empty">Error loading chart</div>';
+            }
         }
 
         // Analytics Functions
