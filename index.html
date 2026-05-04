@@ -949,7 +949,7 @@
                     
                     <div class="form-group">
                         <label for="analyticsMonth">Select Month</label>
-                        <select id="analyticsMonth" onchange="generateAnalytics()">
+                        <select id="analyticsMonth" onchange="console.log('DROPDOWN CHANGED:', this.value); generateAnalytics();">
                             <option value="current">This Month</option>
                             <option value="last">Last Month</option>
                             <option value="last30">Last 30 Days</option>
@@ -1882,15 +1882,16 @@
                     totalIncome += inc.amount;
                 });
                 
-                // Display all analytics - force immediate update
-                requestAnimationFrame(() => {
-                    displayDailySpendingChart(filteredExpenses);
-                    displayAnalyticsCards(categoryTotals, totalExpenses, period);
-                    displaySpendingIncomeChart(totalIncome, totalExpenses);
-                    displayWeeklyBreakdown(filteredExpenses);
-                    
-                    console.log('=== ANALYTICS COMPLETE ===');
-                });
+                // Display all analytics - immediate synchronous update
+                displayDailySpendingChart(filteredExpenses);
+                displayAnalyticsCards(categoryTotals, totalExpenses, period);
+                displaySpendingIncomeChart(totalIncome, totalExpenses);
+                displayWeeklyBreakdown(filteredExpenses);
+                
+                // Force browser reflow/repaint
+                void document.getElementById('analyticsGrid').offsetHeight;
+                
+                console.log('=== ANALYTICS COMPLETE ===');
             }).catch(error => {
                 console.error('Error loading analytics:', error);
                 if (grid) {
