@@ -1833,6 +1833,9 @@
         // Analytics Functions
         function generateAnalytics() {
             const period = document.getElementById('analyticsMonth')?.value || 'current';
+            console.log('=== ANALYTICS GENERATION ===');
+            console.log('Selected period:', period);
+            
             const expensesRef = ref(database, `users/${currentUser.uid}/expenses`);
             const incomeRef = ref(database, `users/${currentUser.uid}/income`);
             
@@ -1851,9 +1854,14 @@
                     income.push({ id: child.key, ...child.val() });
                 });
                 
+                console.log('Total expenses before filter:', expenses.length);
+                
                 // Filter by period
                 const filteredExpenses = filterByPeriod(expenses, period);
                 const filteredIncome = filterByPeriod(income, period);
+                
+                console.log('Filtered expenses after filter:', filteredExpenses.length);
+                console.log('Period being passed to display:', period);
                 
                 // Group expenses by category
                 const categoryTotals = {};
@@ -1867,6 +1875,9 @@
                     totalExpenses += exp.amount;
                 });
                 
+                console.log('Category totals:', categoryTotals);
+                console.log('Total expenses amount:', totalExpenses);
+                
                 // Calculate total income
                 let totalIncome = 0;
                 filteredIncome.forEach(inc => {
@@ -1878,6 +1889,8 @@
                 displayAnalyticsCards(categoryTotals, totalExpenses, period);
                 displaySpendingIncomeChart(totalIncome, totalExpenses);
                 displayWeeklyBreakdown(filteredExpenses);
+                
+                console.log('=== ANALYTICS COMPLETE ===');
             }).catch(error => {
                 console.error('Error loading analytics:', error);
             });
@@ -1914,6 +1927,8 @@
         function displayAnalyticsCards(categoryTotals, total, period) {
             const grid = document.getElementById('analyticsGrid');
             
+            console.log('displayAnalyticsCards called with period:', period);
+            
             if (total === 0) {
                 grid.innerHTML = '<div class="empty-state" style="grid-column: 1/-1;"><p style="color: var(--text-secondary);">No expenses for this period</p></div>';
                 return;
@@ -1929,6 +1944,8 @@
             };
             
             const periodLabel = periodLabels[period] || 'This Month';
+            
+            console.log('Period label will be:', periodLabel);
             
             let html = '';
             
@@ -1951,6 +1968,7 @@
             });
             
             grid.innerHTML = html;
+            console.log('Analytics cards rendered with label:', periodLabel);
         }
 
         function displaySpendingIncomeChart(income, expenses) {
