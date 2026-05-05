@@ -1692,18 +1692,11 @@
             }
         };
 
-        // DAILY SPENDING TREND CHART - RECHARTS VERSION
+        // DAILY SPENDING TREND CHART - CSS VERSION (RELIABLE)
         function displayDailySpendingChart(expenses) {
             const chartContainer = document.getElementById('spendingTrendChart');
             if (!chartContainer) {
                 console.error('Chart container not found');
-                return;
-            }
-
-            // Check if Recharts loaded
-            if (typeof Recharts === 'undefined' || typeof React === 'undefined' || typeof ReactDOM === 'undefined') {
-                console.error('Recharts not loaded');
-                chartContainer.innerHTML = '<div class="chart-empty">Loading chart library...</div>';
                 return;
             }
 
@@ -1735,75 +1728,80 @@
                 dailyData[date] += amount;
             });
 
-            // Convert to Recharts data format
-            const chartData = Object.entries(dailyData)
+            // Convert to array
+            const dataArray = Object.entries(dailyData)
                 .map(([date, amount]) => {
                     const dateObj = new Date(date);
                     return {
-                        date: dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-                        amount: parseFloat(amount.toFixed(2))
+                        date: date,
+                        amount: parseFloat(amount.toFixed(2)),
+                        displayDate: dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
                     };
                 })
+                .filter(item => item !== null)
                 .sort((a, b) => new Date(a.date) - new Date(b.date));
 
-            if (chartData.length === 0) {
+            if (dataArray.length === 0) {
                 chartContainer.innerHTML = '<div class="chart-empty">No data for this period</div>';
                 return;
             }
 
-            console.log('Rendering Recharts with data:', chartData);
+            console.log('Rendering CSS chart with', dataArray.length, 'bars');
 
-            // Custom tooltip
-            const CustomTooltip = ({ active, payload }) => {
-                if (active && payload && payload.length) {
-                    return React.createElement('div', {
-                        style: {
-                            background: 'var(--bg-card)',
-                            border: '1px solid var(--border-color)',
-                            borderRadius: '8px',
-                            padding: '8px 12px',
-                            boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-                        }
-                    },
-                        React.createElement('div', { style: { fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '4px' } }, payload[0].payload.date),
-                        React.createElement('div', { style: { fontSize: '14px', fontWeight: '600', color: 'var(--text-primary)' } }, `₹${formatAmount(payload[0].value)}`)
-                    );
-                }
-                return null;
-            };
-
-            // Create Recharts component
-            const chart = React.createElement(Recharts.ResponsiveContainer, { width: '100%', height: 200 },
-                React.createElement(Recharts.BarChart, {
-                    data: chartData,
-                    margin: { top: 10, right: 10, left: 10, bottom: 30 }
-                },
-                    React.createElement(Recharts.XAxis, {
-                        dataKey: 'date',
-                        stroke: 'var(--text-secondary)',
-                        fontSize: 11,
-                        tickLine: false,
-                        axisLine: false,
-                        tickMargin: 10,
-                        height: 50
-                    }),
-                    React.createElement(Recharts.Tooltip, {
-                        content: CustomTooltip,
-                        cursor: { fill: 'rgba(132, 165, 157, 0.1)' }
-                    }),
-                    React.createElement(Recharts.Bar, {
-                        dataKey: 'amount',
-                        fill: '#84A59D',
-                        radius: [4, 4, 0, 0],
-                        isAnimationActive: false
-                    })
-                )
-            );
-
-            // Clear container and render
-            chartContainer.innerHTML = '';
-            ReactDOM.render(chart, chartContainer);
-            console.log('Recharts rendered successfully');
+            // Find max amount for scaling
+            const maxAmount = Math.max(...dataArray.map(d => d.amount));
+            
+            // Create CSS bar chart
+            let html = `
+                <div style="width: 100%; overflow: hidden; padding: 0 8px;">
+                    <div style="display: flex; align-items: flex-end; gap: 6px; height: 160px; padding: 10px 0; background: transparent;">
+            `;
+            
+            dataArray.forEach(item => {
+                const heightPercent = (item.amount / maxAmount) * 100;
+                const barHeight = Math.max(heightPercent, 8);
+                
+                html += `
+                    <div style="
+                        flex: 1;
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                        justify-content: flex-end;
+                        cursor: pointer;
+                        position: relative;
+                        min-width: 8px;
+                        max-width: 20px;
+                        height: 100%;
+                    " title="${item.displayDate}: ₹${formatAmount(item.amount)}">
+                        <div style="
+                            width: 100%;
+                            height: ${barHeight}%;
+                            background: linear-gradient(180deg, #a8c5b0 0%, #84A59D 100%);
+                            border-radius: 4px 4px 0 0;
+                            transition: all 0.2s ease;
+                            box-shadow: 0 1px 3px rgba(132, 165, 157, 0.3);
+                        " onmouseover="this.style.opacity='0.8'; this.style.transform='translateY(-2px)'" 
+                           onmouseout="this.style.opacity='1'; this.style.transform='translateY(0)'"></div>
+                    </div>
+                `;
+            });
+            
+            html += `
+                    </div>
+                </div>
+            `;
+            
+            // Add legend
+            html += `
+                <div style="display: flex; justify-content: space-between; padding: 8px 12px 0 12px; font-size: 12px; color: var(--text-secondary); font-weight: 500;">
+                    <span>${dataArray[0].displayDate}</span>
+                    <span style="text-align: right;">${dataArray[dataArray.length - 1].displayDate}</span>
+                </div>
+            `;
+            
+            chartContainer.innerHTML = html;
+            console.log('CSS chart rendered');
         }
 
         // Analytics Functions
@@ -1860,14 +1858,23 @@
         }
         
         function renderAnalytics(expenses, income, period) {
+            console.log('=== RENDER ANALYTICS START ===');
             console.log('Total expenses before filter:', expenses.length);
+            console.log('Period:', period);
+            
+            // FORCE IMMEDIATE UI CLEAR - User sees instant feedback
+            document.getElementById('spendingTrendChart').innerHTML = '<div style="padding: 40px; text-align: center; color: var(--text-secondary); font-size: 14px;">⏳ Updating chart...</div>';
+            document.getElementById('analyticsGrid').innerHTML = '<div style="padding: 40px; text-align: center; color: var(--text-secondary); font-size: 14px;">⏳ Updating cards...</div>';
+            
+            // CRITICAL: Force browser to actually render the "Updating..." message
+            document.getElementById('spendingTrendChart').offsetHeight;
+            document.getElementById('analyticsGrid').offsetHeight;
             
             // Filter by period
             const filteredExpenses = filterByPeriod(expenses, period);
             const filteredIncome = filterByPeriod(income, period);
             
             console.log('Filtered expenses after filter:', filteredExpenses.length);
-            console.log('Period being passed to display:', period);
             
             // Group expenses by category
             const categoryTotals = {};
@@ -1882,7 +1889,6 @@
             });
             
             console.log('Category totals:', categoryTotals);
-            console.log('Total expenses amount:', totalExpenses);
             
             // Calculate total income
             let totalIncome = 0;
@@ -1890,13 +1896,13 @@
                 totalIncome += inc.amount;
             });
             
-            // Display all analytics - IMMEDIATE
+            // Render everything synchronously
             displayDailySpendingChart(filteredExpenses);
             displayAnalyticsCards(categoryTotals, totalExpenses, period);
             displaySpendingIncomeChart(totalIncome, totalExpenses);
             displayWeeklyBreakdown(filteredExpenses);
             
-            console.log('=== ANALYTICS COMPLETE ===');
+            console.log('=== RENDER ANALYTICS COMPLETE ===');
         }
 
         function filterByPeriod(data, period) {
