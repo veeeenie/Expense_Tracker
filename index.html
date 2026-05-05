@@ -1805,7 +1805,7 @@
         }
 
         // Analytics Functions
-        function generateAnalytics() {
+        window.generateAnalytics = function() {
             const period = document.getElementById('analyticsMonth')?.value || 'current';
             console.log('🔄 DROPDOWN CHANGED TO:', period);
             
