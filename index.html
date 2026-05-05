@@ -1807,25 +1807,32 @@
         // Analytics Functions
         function generateAnalytics() {
             const period = document.getElementById('analyticsMonth')?.value || 'current';
-            console.log('=== ANALYTICS GENERATION ===');
-            console.log('Selected period:', period);
+            console.log('🔄 DROPDOWN CHANGED TO:', period);
             
-            // If we have cached data, use it immediately
-            if (allExpensesCache.length > 0 || allIncomeCache.length > 0) {
-                console.log('Using cached data for instant update');
-                renderAnalytics(allExpensesCache, allIncomeCache, period);
-            }
-            
-            // Show loading state
+            // Show immediate loading state
             const grid = document.getElementById('analyticsGrid');
-            if (grid) {
-                grid.innerHTML = '<div style="padding: 40px; text-align: center; color: var(--text-secondary);">Loading...</div>';
+            const chart = document.getElementById('spendingTrendChart');
+            
+            if (grid) grid.innerHTML = '<div style="padding: 40px; text-align: center; color: var(--accent-sage); font-weight: 600;">⏳ Loading...</div>';
+            if (chart) chart.innerHTML = '<div style="padding: 40px; text-align: center; color: var(--accent-sage); font-weight: 600;">⏳ Loading...</div>';
+            
+            // Use cached data if available - render in next cycle
+            if (allExpensesCache.length > 0 || allIncomeCache.length > 0) {
+                console.log('✓ Using cached data');
+                
+                // Use requestIdleCallback or setTimeout to ensure next render cycle
+                const scheduleRender = window.requestIdleCallback || ((cb) => setTimeout(cb, 0));
+                
+                scheduleRender(() => {
+                    console.log('🎨 Rendering with cached data');
+                    renderAnalytics(allExpensesCache, allIncomeCache, period);
+                });
             }
             
+            // Fetch fresh data from Firebase
             const expensesRef = ref(database, `users/${currentUser.uid}/expenses`);
             const incomeRef = ref(database, `users/${currentUser.uid}/income`);
             
-            // Fetch fresh data and update cache
             Promise.all([
                 get(expensesRef),
                 get(incomeRef)
@@ -1844,13 +1851,18 @@
                 allExpensesCache = expenses;
                 allIncomeCache = income;
                 
-                console.log('Data fetched and cached');
+                console.log('✓ Fresh data fetched');
                 
-                // Render with fresh data
-                renderAnalytics(expenses, income, period);
+                // Render with fresh data in next cycle
+                const scheduleRender = window.requestIdleCallback || ((cb) => setTimeout(cb, 0));
+                
+                scheduleRender(() => {
+                    console.log('🎨 Rendering with fresh data');
+                    renderAnalytics(expenses, income, period);
+                });
                 
             }).catch(error => {
-                console.error('Error loading analytics:', error);
+                console.error('❌ Error loading analytics:', error);
                 if (grid) {
                     grid.innerHTML = '<div style="padding: 40px; text-align: center; color: var(--accent-terra);">Error loading data</div>';
                 }
@@ -1858,23 +1870,15 @@
         }
         
         function renderAnalytics(expenses, income, period) {
-            console.log('=== RENDER ANALYTICS START ===');
-            console.log('Total expenses before filter:', expenses.length);
-            console.log('Period:', period);
-            
-            // FORCE IMMEDIATE UI CLEAR - User sees instant feedback
-            document.getElementById('spendingTrendChart').innerHTML = '<div style="padding: 40px; text-align: center; color: var(--text-secondary); font-size: 14px;">⏳ Updating chart...</div>';
-            document.getElementById('analyticsGrid').innerHTML = '<div style="padding: 40px; text-align: center; color: var(--text-secondary); font-size: 14px;">⏳ Updating cards...</div>';
-            
-            // CRITICAL: Force browser to actually render the "Updating..." message
-            document.getElementById('spendingTrendChart').offsetHeight;
-            document.getElementById('analyticsGrid').offsetHeight;
+            console.log('🎨 === RENDERING ANALYTICS ===');
+            console.log('📊 Period:', period);
+            console.log('📈 Expenses:', expenses.length);
             
             // Filter by period
             const filteredExpenses = filterByPeriod(expenses, period);
             const filteredIncome = filterByPeriod(income, period);
             
-            console.log('Filtered expenses after filter:', filteredExpenses.length);
+            console.log('✓ Filtered to:', filteredExpenses.length, 'expenses');
             
             // Group expenses by category
             const categoryTotals = {};
@@ -1888,21 +1892,21 @@
                 totalExpenses += exp.amount;
             });
             
-            console.log('Category totals:', categoryTotals);
-            
             // Calculate total income
             let totalIncome = 0;
             filteredIncome.forEach(inc => {
                 totalIncome += inc.amount;
             });
             
-            // Render everything synchronously
+            console.log('🎯 Rendering UI components...');
+            
+            // Render all components
             displayDailySpendingChart(filteredExpenses);
             displayAnalyticsCards(categoryTotals, totalExpenses, period);
             displaySpendingIncomeChart(totalIncome, totalExpenses);
             displayWeeklyBreakdown(filteredExpenses);
             
-            console.log('=== RENDER ANALYTICS COMPLETE ===');
+            console.log('✅ === RENDER COMPLETE ===');
         }
 
         function filterByPeriod(data, period) {
